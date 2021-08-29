@@ -1,0 +1,12 @@
+# Packages
+node_modules/
+
+# Log Files
+logs/
+*.log
+
+# Editor
+.vscode/
+
+# Flatfile Data
+data/
