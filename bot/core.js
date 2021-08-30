@@ -19,8 +19,6 @@ function init() {
 	commandManager.init();
 
 	client.login(config.discordToken);
-
-	commandManager.registerSlashCommands(client);
 }
 
 /**
