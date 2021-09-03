@@ -1,18 +1,24 @@
 const commandManager = require("../managers/Commands.js");
 const commands = commandManager.getCommands();
-const aliases = commandManager.getAliases();
 const logger = require("../managers/Logger.js");
 
 module.exports = async (client, interaction) => {
-	if (!interaction.isCommand()) return;
+	// Check if the interaction is a command or not.
+	if (interaction.isCommand()) {
+		try {
+			// Return if it's not a command.
+			if (!commands.get(interaction.commandName)) return;
 
-	try {
-		// Return if it's not a command or alias
-		if (!(interaction.commandName || aliases.get(interaction.commandName))) return;
+			// Run the command.
+			await commands.get(interaction.commandName).run(client, interaction);
 
-		await commands.get(interaction.commandName || aliases.get(interaction.commandName)).run(client, interaction);
-	} catch (error) {
-		await interaction.reply({ content: "There was an error executing this, please try again later or contact the bot owner.", ephemeral: true });
-		logger.error(error);
+			logger.log(
+				`"${interaction.member.user.username}#${interaction.member.user.discriminator} ran command ${interaction.commandName} in guild "${interaction.guild.name}" (${interaction.guild.id})`,
+				"cmd"
+			);
+		} catch (error) {
+			await interaction.reply({ content: "There was an error executing this, please try again later or contact the bot owner.", ephemeral: true });
+			logger.error(error);
+		}
 	}
 };
