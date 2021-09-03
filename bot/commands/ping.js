@@ -19,17 +19,17 @@ exports.run = async (client, interaction) => {
 		return str;
 	}
 
-	const embed = new MessageEmbed().setTitle("〽️ Ping!");
+	const ping = new MessageEmbed().setTitle("〽️ Ping!");
 
-	const message = await interaction.reply({ embeds: [embed] });
+	const message = await interaction.reply({ embeds: [ping], fetchReply: true });
 
-	embed.setTitle("📶 Pong!").setTimestamp().setDescription(`
-    **Ping**: ${message.createdAt - interaction.createdAt} ms
-    **API** ${Math.round(client.ws.ping)} ms
-    **Uptime** ${msToTime(client.uptime)}
-  `);
+	const pong = new MessageEmbed().setTitle("📶 Pong!").setTimestamp().setDescription(`
+	  **Response Time**: ${message.createdAt - interaction.createdAt} ms
+	  **WebSocket Ping** ${Math.round(client.ws.ping)} ms
+	  **Uptime** ${msToTime(client.uptime)}
+	`);
 
-	await interaction.editReply({ embeds: [embed] });
+	await interaction.editReply({ embeds: [pong] });
 };
 
 exports.help = {
