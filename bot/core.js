@@ -70,6 +70,10 @@ function reloadCommands() {
 	commandManager.init();
 }
 
+function registerSlashCommands() {
+	commandManager.registerSlashCommands(client);
+}
+
 module.exports = {
 	init,
 	destroy,
@@ -78,4 +82,5 @@ module.exports = {
 	reloadEvents,
 	reloadCommand,
 	reloadCommands,
+	registerSlashCommands,
 };

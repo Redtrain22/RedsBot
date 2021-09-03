@@ -46,6 +46,10 @@ function handleTerminal(input) {
 			bot.reloadCommands();
 			break;
 
+		case "registerSlashCommands":
+			bot.registerSlashCommands();
+			break;
+
 		case "stop":
 		case "quit":
 		case "destroy":

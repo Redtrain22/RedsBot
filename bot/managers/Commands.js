@@ -1,11 +1,11 @@
 const { Collection } = require("discord.js");
 const fs = require("fs");
 const { log } = require("./Logger");
-// const config = require("../managers/Config.js").getConfig();
+const config = require("../managers/Config.js").getConfig();
 
 const commands = new Collection();
 const aliases = new Collection();
-// const commandIds = new Collection();
+const commandIds = new Collection();
 
 /**
  * Initialize the Command Manager.
@@ -53,6 +53,10 @@ function reloadCommand(commandName) {
 	setAliases(command.help.name.toLowerCase());
 }
 
+/**
+ * Register slash commands.
+ * @param {Client} client A Discord.JS client to register the slash commands to.
+ */
 async function registerSlashCommands(client) {
 	const slashCommands = [];
 
@@ -71,59 +75,92 @@ async function registerSlashCommands(client) {
 		}
 	}
 
+	await client.application.fetch();
 	await client.application?.commands.set(slashCommands);
 	log("Set Slash Commands.");
+
+	await generateCommandIds(client);
+	await setPermissions(client);
 }
 
-// // Setup for when we start writing permissions to guilds, we're going to need the commandId.
-// function generateCommandIds(client) {
-// 	client.application?.commands.cache.forEach((command, id) => {
-// 		commandIds.set(command.name, id);
-// 	});
-// }
+/**
+ * Loop through each guild in the client.guilds.cache Manager and set guild permissions there.
+ * @param {Client} client A Discord.JS client.
+ */
+async function setPermissions(client) {
+	await generateCommandIds(client);
 
-// // Setup for when we start doing command per guild
-// function generateOverrides() {
-// 	const globalOverides = new Collection();
+	const overrides = generateOverrides();
+	for (const [guildId, guild] of client.guilds.cache) {
+		for (const [commandName, permissions] of overrides) {
+			const guild = await client.guilds.cache.get(guildId);
+			guild.commands.permissions.add({ command: commandIds.get(commandName), permissions: permissions });
+		}
 
-// 	for (const [, command] of commands) {
-// 		if (!command.config.enabled) continue;
-// 		const commandName = command.help.name.toLowerCase();
-// 		if (command.help.level == "Dev") {
-// 			config.devIds.forEach((devId) => {
-// 				globalOverides.set(
-// 					commandName,
-// 					globalOverides.get(commandName)
-// 						? globalOverides.get(commandName).concat({ id: devId, type: "USER", permission: true })
-// 						: [{ id: devId, type: "USER", permission: true }]
-// 				);
-// 			});
-// 		}
+		log(`Set slash command permissions in guild "${guild.name}"`);
+	}
+}
 
-// 		if (command.help.level == "Admin") {
-// 			config.adminIds.forEach((adminId) => {
-// 				globalOverides.set(
-// 					commandName,
-// 					globalOverides.get(commandName)
-// 						? globalOverides.get(commandName).concat({ id: adminId, type: "USER", permission: true })
-// 						: [{ id: adminId, type: "USER", permission: true }]
-// 				);
-// 			});
-// 		}
+/**
+ * Generate command IDs from registered commands.
+ * @param {Client} client A Discord.JS client.
+ */
+async function generateCommandIds(client) {
+	await client.application?.commands.fetch();
+	client.application?.commands.cache.forEach((command, id) => {
+		commandIds.set(command.name, id);
+	});
+}
 
-// 		config.ownerIds.forEach((ownerId) => {
-// 			globalOverides.set(
-// 				commandName,
-// 				globalOverides.get(commandName)
-// 					? globalOverides.get(commandName).concat({ id: ownerId, type: "USER", permission: true })
-// 					: [{ id: ownerId, type: "USER", permission: true }]
-// 			);
-// 		});
-// 	}
+/**
+ * Generate permission overrides for commands.
+ * @returns A collection full of permission objects for Discord under each command name.
+ */
+function generateOverrides() {
+	const permissionOverides = new Collection();
 
-// 	return globalOverides;
-// }
+	for (const [, command] of commands) {
+		if (!command.config.enabled) continue;
+		const commandName = command.help.name.toLowerCase();
+		if (command.help.level == "Dev") {
+			config.devIds.forEach((devId) => {
+				permissionOverides.set(
+					commandName,
+					permissionOverides.get(commandName)
+						? permissionOverides.get(commandName).concat({ id: devId, type: "USER", permission: true })
+						: [{ id: devId, type: "USER", permission: true }]
+				);
+			});
+		}
 
+		if (command.help.level == "Admin") {
+			config.adminIds.forEach((adminId) => {
+				permissionOverides.set(
+					commandName,
+					permissionOverides.get(commandName)
+						? permissionOverides.get(commandName).concat({ id: adminId, type: "USER", permission: true })
+						: [{ id: adminId, type: "USER", permission: true }]
+				);
+			});
+		}
+
+		config.ownerIds.forEach((ownerId) => {
+			permissionOverides.set(
+				commandName,
+				permissionOverides.get(commandName)
+					? permissionOverides.get(commandName).concat({ id: ownerId, type: "USER", permission: true })
+					: [{ id: ownerId, type: "USER", permission: true }]
+			);
+		});
+	}
+
+	return permissionOverides;
+}
+
+/**
+ * Set the aliases of a command from the commands collections.
+ * @param {String} commandName The commandName to get from the command collection to register our aliases for.
+ */
 function setAliases(commandName) {
 	commands.get(commandName).help.aliases.forEach((alias) => {
 		aliases.set(alias, commandName);
@@ -131,13 +168,17 @@ function setAliases(commandName) {
 }
 
 /**
- * Get the commands for the bot.
+ * Get all the commands for the bot.
  * @returns All commands that can are ready to be loaded.
  */
 function getCommands() {
 	return commands;
 }
 
+/**
+ * Get all the command aliases for the bot.
+ * @returns A Collection that returns a command name when accessing an alias.
+ */
 function getAliases() {
 	return aliases;
 }
@@ -147,6 +188,7 @@ module.exports = {
 	destroy,
 	reloadCommand,
 	registerSlashCommands,
+	setPermissions,
 	getCommands,
 	getAliases,
 };
