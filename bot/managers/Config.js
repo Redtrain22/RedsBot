@@ -11,14 +11,16 @@ const configTemplate = {
 	youtubeToken: "Replace Me",
 };
 
-const config = assignConfig();
+let config = {};
 
-function assignConfig() {
+function init() {
 	if (fs.existsSync("./data/config.json")) {
 		try {
-			const tempConfig = JSON.parse(fs.readFileSync("./data/config.json"));
+			config = JSON.parse(fs.readFileSync("./data/config.json"));
 			log("Config loaded.");
-			return tempConfig;
+
+			checkFields(); // Check for fields that aren't filled.
+			appendConfig(); // Check for config update and ONLY APPEND TO IT.
 		} catch (err) {
 			log("Config error, looks like a formatting issue.");
 			error(err);
@@ -27,11 +29,6 @@ function assignConfig() {
 		log("Config not found! Time to make one. Please fill out the fields.");
 		fs.writeFileSync("./data/config.json", JSON.stringify(configTemplate, null, 2));
 	}
-}
-
-function checkConfig() {
-	checkFields(); // Check for fields that aren't filled.
-	appendConfig(); // Check for config update and ONLY APPEND TO IT.
 }
 
 // ONLY APPEND DON'T REMOVE
@@ -85,6 +82,6 @@ function getConfig() {
 }
 
 module.exports = {
-	checkConfig,
+	init,
 	getConfig,
 };

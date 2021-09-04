@@ -1,5 +1,7 @@
 const { Client, Intents } = require("discord.js");
 const configManager = require("./managers/Config.js");
+configManager.init(); // Initialize our config so that other managers can access it if need be.
+
 const eventManager = require("./managers/Events.js");
 const commandManager = require("./managers/Commands.js");
 
@@ -11,12 +13,10 @@ const client = new Client({ intents: intents }); // Client has to be declared ou
  * Initialize the bot.
  */
 function init() {
-	configManager.checkConfig();
-
 	const config = configManager.getConfig();
 
-	eventManager.init(client);
 	commandManager.init();
+	eventManager.init(client);
 
 	client.login(config.discordToken);
 }
