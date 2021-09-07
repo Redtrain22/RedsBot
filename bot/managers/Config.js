@@ -3,12 +3,19 @@ const { log, error } = require("./Logger.js");
 
 // Make our config.json template here.
 const configTemplate = {
-	version: "1.0.0",
+	version: "1.1.0",
 	ownerIds: [],
 	devIds: [],
 	adminIds: [],
 	discordToken: "Replace Me",
 	youtubeToken: "Replace Me",
+	databaseType: "SQLite",
+	databaseHost: "127.0.0.1",
+	databasePort: NaN,
+	databaseName: "Replace Me",
+	databaseUser: "Replace Me",
+	databasePassword: "Replace Me",
+	databaseLogging: true,
 };
 
 let config = {};
@@ -66,6 +73,8 @@ function checkFields() {
 		// We don't need to test these fields in here.
 		// Version should now be the new "default value".
 		if (configField == "version") continue;
+		if (configField == "databaseType") continue;
+		if (configField == "databaseLogging") continue;
 		// devIds and adminIds are able to be blank fields.
 		if (configField == "devIds") continue;
 		if (configField == "adminIds") continue;

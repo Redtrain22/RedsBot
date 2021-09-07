@@ -2,8 +2,9 @@ const { Client, Intents } = require("discord.js");
 const configManager = require("./managers/Config.js");
 configManager.init(); // Initialize our config so that other managers can access it if need be.
 
-const eventManager = require("./managers/Events.js");
+const databaseManager = require("./managers/Database.js");
 const commandManager = require("./managers/Commands.js");
+const eventManager = require("./managers/Events.js");
 
 // New instance of the discord client
 const intents = new Intents(["GUILDS", "GUILD_MESSAGES", "GUILD_BANS", "GUILD_VOICE_STATES", "DIRECT_MESSAGES"]); // Client Intents
@@ -15,6 +16,7 @@ const client = new Client({ intents: intents }); // Client has to be declared ou
 function init() {
 	const config = configManager.getConfig();
 
+	databaseManager.init();
 	commandManager.init();
 	eventManager.init(client);
 
@@ -27,6 +29,7 @@ function init() {
 function destroy() {
 	eventManager.destroy(client);
 	commandManager.destroy();
+	databaseManager.destroy();
 	client.destroy();
 }
 
