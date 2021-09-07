@@ -84,6 +84,24 @@ async function registerSlashCommands(client) {
 }
 
 /**
+ * Unregister slash commands from discord.
+ * @param {Client} client - A Discord.JS client instance to remove the slash commands from.
+ * @param {BigInt} scope - A guildId to remove the commands from.
+ */
+async function unregisterSlashCommands(client, scope = "global") {
+	if (client.application?.commands) await client.application?.fetch();
+
+	if (scope == "global") {
+		client.application.commands.set([]);
+		log("Unregistered slash commands globally, please register them again to have global commands.");
+	} else {
+		const guild = client.guilds.cache.get(scope);
+		guild.commands.set([]);
+		log(`Unregistered slash commands in "${guild.name}" (${guild.id})`);
+	}
+}
+
+/**
  * Loop through each guild in the client.guilds.cache Manager and set guild permissions there.
  * @param {Client} client A Discord.JS client.
  */
@@ -188,6 +206,7 @@ module.exports = {
 	destroy,
 	reloadCommand,
 	registerSlashCommands,
+	unregisterSlashCommands,
 	setPermissions,
 	getCommands,
 	getAliases,

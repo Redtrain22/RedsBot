@@ -77,6 +77,15 @@ function registerSlashCommands() {
 	commandManager.registerSlashCommands(client);
 }
 
+function unregisterSlashCommands(args) {
+	// Check length because we might want to do global commands.
+	if (args.length == 0) {
+		commandManager.unregisterSlashCommands(client);
+	} else {
+		commandManager.unregisterSlashCommands(client, args);
+	}
+}
+
 module.exports = {
 	init,
 	destroy,
@@ -86,4 +95,5 @@ module.exports = {
 	reloadCommand,
 	reloadCommands,
 	registerSlashCommands,
+	unregisterSlashCommands,
 };

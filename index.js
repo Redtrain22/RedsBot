@@ -50,6 +50,10 @@ function handleTerminal(input) {
 			bot.registerSlashCommands();
 			break;
 
+		case "unregisterSlashCommands":
+			bot.unregisterSlashCommands(args);
+			break;
+
 		case "stop":
 		case "quit":
 		case "destroy":
