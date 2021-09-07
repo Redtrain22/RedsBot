@@ -112,7 +112,11 @@ async function setPermissions(client) {
 	for (const [guildId, guild] of client.guilds.cache) {
 		for (const [commandName, permissions] of overrides) {
 			const guild = await client.guilds.cache.get(guildId);
-			guild.commands.permissions.add({ command: commandIds.get(commandName), permissions: permissions });
+
+			// If the command doesn't exist as an ID we're going to ignore it.
+			if (commandIds.get(commandName) == undefined) continue;
+
+			await guild.commands.permissions.add({ command: commandIds.get(commandName), permissions: permissions });
 		}
 
 		log(`Set slash command permissions in guild "${guild.name}"`);
@@ -138,6 +142,8 @@ function generateOverrides() {
 	const permissionOverides = new Collection();
 
 	for (const [, command] of commands) {
+		// console.log(command.help.name);
+		// console.log(command.config.enabled);
 		if (!command.config.enabled) continue;
 		const commandName = command.help.name.toLowerCase();
 		if (command.help.level == "Dev") {
