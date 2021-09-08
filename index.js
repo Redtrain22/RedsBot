@@ -31,7 +31,8 @@ function handleTerminal(input) {
 			break;
 
 		case "reloadEvent":
-			bot.reloadEvent(args);
+			// We pass args[0] since we're only reloading one event.
+			bot.reloadEvent(args[0]);
 			break;
 
 		case "reloadEvents":
@@ -39,7 +40,8 @@ function handleTerminal(input) {
 			break;
 
 		case "reloadCommand":
-			bot.reloadCommand(args);
+			// We pass args[0] since we're only reloading one command.
+			bot.reloadCommand(args[0]);
 			break;
 
 		case "reloadCommands":
