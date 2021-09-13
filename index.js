@@ -5,7 +5,6 @@ if (Number(process.version.slice(1).split(".")[0]) < 16 && Number(process.versio
 	throw new Error("Node 16.6.0 or newer is required. Please update Node on your system.");
 
 // Load libraries for FileIO and OS Detection
-const os = require("os");
 const fs = require("fs");
 const bot = require("./bot/core.js");
 
@@ -74,30 +73,16 @@ function destroy() {
 }
 
 function init() {
-	switch (os.platform()) {
-		case "win32":
-			if (!fs.existsSync("logs//")) {
-				fs.mkdirSync("logs//");
-			}
+	if (!fs.existsSync("./logs")) {
+		fs.mkdirSync("./logs");
+	}
 
-			if (!fs.existsSync("data//")) {
-				fs.mkdirSync("data//");
-			}
-			break;
+	if (!fs.existsSync("./data")) {
+		fs.mkdirSync("./data");
+	}
 
-		case "darwin":
-		case "linux":
-			if (!fs.existsSync("./logs")) {
-				fs.mkdirSync("./logs");
-			}
-
-			if (!fs.existsSync("./data")) {
-				fs.mkdirSync("./data");
-			}
-			break;
-
-		default:
-			throw new Error("Unsupported operating, or undetected operating system.");
+	if (!fs.existsSync("./bot/audioCache")) {
+		fs.mkdirSync("./bot/audioCache");
 	}
 
 	terminal.prompt();
