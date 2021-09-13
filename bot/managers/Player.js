@@ -19,7 +19,7 @@ function init(guildId) {
 }
 
 /**
- * Destroy the guild's audioPlayer.
+ * Destroy the player for the guild and the connection for the guild.
  * @param {BigInt} guildId - The guild's ID from discord.
  */
 function destroy(guildId) {
@@ -34,11 +34,16 @@ function destroy(guildId) {
  * @param {VoiceConnection} connection - The connection currently in use.
  */
 function play(interaction, connection) {
+	// If we don't have an audio player, we make one.
+	// AudioPlayers are meant to be reused.
 	if (audioPlayers.get(interaction.guild.id) == undefined) {
 		init(interaction.guild.id);
 	}
 
+	// Get the audioPlayer from the Collection.
 	const audioPlayer = audioPlayers.get(interaction.guild.id);
+	// We shift the queue here so that we know what the current song is.
+	queueManager.shiftQueue(interaction.guild.id);
 
 	// Base case for recursion.
 	if (
@@ -49,14 +54,13 @@ function play(interaction, connection) {
 			// We test again to make sure there's no songs in queue or in the current song.
 			if (
 				(queueManager.getQueue(interaction.guild.id) == undefined || queueManager.getQueue(interaction.guild.id).length == 0) &&
-				queueManager.getCurrentSong(interaction.guild.id)
+				queueManager.getCurrentSong(interaction.guild.id) == undefined
 			) {
 				await interaction.channel.send({ content: "Nothing in queue, leaving channel." });
 				connection.destroy();
 			}
 		}, 10000);
 	} else {
-		queueManager.shiftQueue(interaction.guild.id);
 		audioPlayer.play(queueManager.getCurrentSong(interaction.guild.id));
 		connection.subscribe(audioPlayer);
 
