@@ -35,6 +35,7 @@ exports.run = async (client, interaction) => {
 exports.help = {
 	name: "ping",
 	description: "Ping... Pong!",
+	options: [],
 	aliases: [""],
 	level: "User",
 };
