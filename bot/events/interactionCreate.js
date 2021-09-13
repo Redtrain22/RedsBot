@@ -28,7 +28,17 @@ module.exports = async (client, interaction) => {
 				"cmd"
 			);
 		} catch (error) {
-			await interaction.reply({ content: "There was an error executing this, please try again later or contact the bot owner.", ephemeral: true });
+			if (interaction.deferred || interaction.replied) {
+				await interaction.followUp({
+					content: "There was an error executing this, please try again later or contact the bot owner.",
+					ephemeral: true,
+				});
+			} else {
+				await interaction.reply({
+					content: "There was an error executing this, please try again later or contact the bot owner.",
+					ephemeral: true,
+				});
+			}
 			logger.error(error);
 		}
 	}
