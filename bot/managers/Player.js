@@ -78,7 +78,7 @@ function play(interaction, connection) {
  * @param {BigInt} guildId - The guild's ID from discord.
  */
 function getPlayer(guildId) {
-	audioPlayers.get(guildId);
+	return audioPlayers.get(guildId);
 }
 
 /**
