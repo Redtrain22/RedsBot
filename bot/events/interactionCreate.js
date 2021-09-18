@@ -24,7 +24,7 @@ module.exports = async (client, interaction) => {
 			await commands.get(interaction.commandName).run(client, interaction);
 
 			logger.log(
-				`"${interaction.member.user.username}#${interaction.member.user.discriminator} ran command ${interaction.commandName} in guild "${interaction.guild.name}" (${interaction.guild.id})`,
+				`"${interaction.member.user.username}#${interaction.member.user.discriminator}" ran command ${interaction.commandName} in guild "${interaction.guild.name}" (${interaction.guild.id})`,
 				"cmd"
 			);
 		} catch (error) {
