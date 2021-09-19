@@ -2,7 +2,7 @@ const queueManager = require("../managers/Queue.js");
 const playerManager = require("../managers/Player.js");
 
 exports.run = async (client, interaction) => {
-	const songNumber = interaction.options.get("song").value;
+	const songNumber = interaction.options.get("song")?.value;
 
 	if (songNumber > 0 && songNumber <= queueManager.getQueue(interaction.guild.id)?.length) {
 		const skippedSong = queueManager.getQueue(interaction.guild.id).splice(songNumber - 1, 1)[0];
