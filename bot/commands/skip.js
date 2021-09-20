@@ -9,8 +9,9 @@ exports.run = async (client, interaction) => {
 
 		return await interaction.reply({ content: `Skipped song number ${songNumber}, which was ${skippedSong.metadata.youtubeURL}` });
 	} else {
+		const currentSong = queueManager.getCurrentSong(interaction.guild.id);
 		playerManager.getPlayer(interaction.guild.id).stop();
-		return await interaction.reply({ content: "Skipped currently playing song." });
+		return await interaction.reply({ content: `Skipped currently playing song. The current song was ${currentSong.metadata.youtubeURL}` });
 	}
 };
 
