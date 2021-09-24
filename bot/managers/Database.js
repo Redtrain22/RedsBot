@@ -1,13 +1,16 @@
-const { Sequelize, Model, DataTypes } = require("sequelize");
+const { Sequelize, DataTypes } = require("sequelize");
 const config = require("./Config.js").getConfig();
 const logger = require("./Logger.js");
 
-const sequelize = createDB();
+// Delcare our sequelize object here.
+let sequelize = createDB();
+
+let Statistic = require("../models/Statistic.js")(sequelize, DataTypes);
 
 function createDB() {
 	const dialect = config.databaseType.toLowerCase();
 
-	switch (config.databaseType.toLowerCase()) {
+	switch (dialect) {
 		case "sqlite":
 			return new Sequelize({
 				dialect: dialect,
@@ -60,6 +63,13 @@ function createDB() {
 }
 
 async function init() {
+	// Reassign our sequelize variable to make sure we can access our sequelize object.
+	// The init function should only be called up first load, so that's why we do it.
+	// If the connection is closed then the sequelize.connectionManager.getConnection will throw an error and crash the application.
+	sequelize = createDB();
+
+	Statistic = require("../models/Statistic.js")(sequelize, DataTypes);
+
 	try {
 		await sequelize.authenticate();
 		await syncModels();
@@ -79,26 +89,6 @@ async function destroy() {
 async function syncModels() {
 	await Statistic.sync();
 }
-
-class Statistic extends Model {
-	add(number = 1) {
-		this.increment("interactionCount", { by: number });
-	}
-}
-
-Statistic.init(
-	{
-		guildId: {
-			type: DataTypes.BIGINT,
-			allowNull: false,
-		},
-		interactionCount: {
-			type: DataTypes.BIGINT,
-			defaultValue: 0,
-		},
-	},
-	{ sequelize: sequelize, modelName: "Statistic" }
-);
 
 module.exports = {
 	init,

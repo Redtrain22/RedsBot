@@ -15,18 +15,18 @@ const terminal = require("readline").createInterface({
 	output: process.stdout,
 });
 
-terminal.on("line", (line) => {
-	handleTerminal(line);
+terminal.on("line", async (line) => {
+	await handleTerminal(line);
 	terminal.prompt();
 });
 
-function handleTerminal(input) {
+async function handleTerminal(input) {
 	const args = input.split(/ +/g);
 	const command = args.shift();
 
 	switch (command) {
 		case "restart":
-			bot.restart();
+			await bot.restart();
 			break;
 
 		case "reloadEvent":
@@ -58,7 +58,7 @@ function handleTerminal(input) {
 		case "stop":
 		case "quit":
 		case "destroy":
-			destroy();
+			await destroy();
 			break;
 
 		default:
@@ -66,13 +66,13 @@ function handleTerminal(input) {
 	}
 }
 
-function destroy() {
+async function destroy() {
 	terminal.close();
-	bot.destroy();
+	await bot.destroy();
 	process.exit(0);
 }
 
-function init() {
+async function init() {
 	if (!fs.existsSync("./logs")) {
 		fs.mkdirSync("./logs");
 	}
@@ -87,7 +87,7 @@ function init() {
 
 	terminal.prompt();
 
-	bot.init();
+	await bot.init();
 }
 
 init();

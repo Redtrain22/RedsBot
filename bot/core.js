@@ -13,10 +13,10 @@ const client = new Client({ intents: intents }); // Client has to be declared ou
 /**
  * Initialize the bot.
  */
-function init() {
+async function init() {
 	const config = configManager.getConfig();
 
-	databaseManager.init();
+	await databaseManager.init();
 	commandManager.init();
 	eventManager.init(client);
 
@@ -26,19 +26,19 @@ function init() {
 /**
  * Safely Destroy the bot.
  */
-function destroy() {
+async function destroy() {
 	eventManager.destroy(client);
 	commandManager.destroy();
-	databaseManager.destroy();
+	await databaseManager.destroy();
 	client.destroy();
 }
 
 /**
  * Safely restart the bot.
  */
-function restart() {
-	destroy();
-	init();
+async function restart() {
+	await destroy();
+	await init();
 }
 
 /**
