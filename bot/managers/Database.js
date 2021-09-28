@@ -72,7 +72,7 @@ async function init() {
 
 	try {
 		await sequelize.authenticate();
-		await syncModels();
+		await sequelize.sync();
 	} catch (error) {
 		logger.error(error);
 	}
@@ -84,10 +84,6 @@ async function destroy() {
 	} catch (error) {
 		logger.error(error);
 	}
-}
-
-async function syncModels() {
-	await Statistic.sync();
 }
 
 module.exports = {
