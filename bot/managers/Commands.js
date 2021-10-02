@@ -92,11 +92,11 @@ async function unregisterSlashCommands(client, scope = "global") {
 	if (client.application?.commands) await client.application?.fetch();
 
 	if (scope == "global") {
-		client.application.commands.set([]);
+		await client.application.commands.set([]);
 		log("Unregistered slash commands globally, please register them again to have global commands.");
 	} else {
 		const guild = client.guilds.cache.get(scope);
-		guild.commands.set([]);
+		await guild.commands.set([]);
 		log(`Unregistered slash commands in "${guild.name}" (${guild.id})`);
 	}
 }

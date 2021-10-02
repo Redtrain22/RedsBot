@@ -48,11 +48,11 @@ async function handleTerminal(input) {
 			break;
 
 		case "registerSlashCommands":
-			bot.registerSlashCommands();
+			await bot.registerSlashCommands();
 			break;
 
 		case "unregisterSlashCommands":
-			bot.unregisterSlashCommands(args);
+			await bot.unregisterSlashCommands(args);
 			break;
 
 		case "stop":

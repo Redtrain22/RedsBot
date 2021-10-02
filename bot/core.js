@@ -73,16 +73,16 @@ function reloadCommands() {
 	commandManager.init();
 }
 
-function registerSlashCommands() {
-	commandManager.registerSlashCommands(client);
+async function registerSlashCommands() {
+	await commandManager.registerSlashCommands(client);
 }
 
-function unregisterSlashCommands(args) {
+async function unregisterSlashCommands(args) {
 	// Check length because we might want to do global commands.
 	if (args.length == 0) {
-		commandManager.unregisterSlashCommands(client);
+		await commandManager.unregisterSlashCommands(client);
 	} else {
-		commandManager.unregisterSlashCommands(client, args);
+		await commandManager.unregisterSlashCommands(client, args);
 	}
 }
 
