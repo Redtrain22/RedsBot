@@ -3,9 +3,12 @@ const youtube = require("youtube-dl-exec");
 const queueManager = require("../managers/Queue.js");
 const playerManager = require("../managers/Player.js");
 const logger = require("../managers/Logger.js");
+const { YTSearcher } = require("ytsearcher");
+const { youtubeToken } = require("../managers/Config.js").getConfig();
 const { getVoiceConnection, joinVoiceChannel, VoiceConnectionStatus, createAudioResource, StreamType, entersState } = require("@discordjs/voice");
 
 const regexYT = new RegExp("(^(https?\\:\\/\\/)?(www\\.youtube\\.com|youtu\\.be)\\/(watch\\?v=.{11}|.{11})$)|(^.{11}$)");
+const ytSearcher = new YTSearcher(youtubeToken);
 
 const queryOptions = {
 	noCallHome: true,
@@ -44,6 +47,15 @@ function checkCache(filePath) {
 	return fs.existsSync(`${filePath}`);
 }
 
+async function searchSong(query) {
+	if (query == undefined) return null;
+	const results = await ytSearcher.search(query, { type: "video" });
+
+	return results.currentPage.first().url;
+}
+
+// async function checkSong(songURL) {}
+
 exports.run = async (client, interaction) => {
 	await interaction.deferReply();
 
@@ -51,8 +63,12 @@ exports.run = async (client, interaction) => {
 
 	if (!interaction.member.voice.channel) return interaction.followUp({ content: "Please join a voice channel to use this command", ephemeral: true });
 
-	const youtubeSong = interaction.options.get("youtube").value;
+	const ytSong = interaction.options.get("youtube")?.value;
+	const searchResult = await searchSong(interaction.options.get("search")?.value);
+	const youtubeSong = ytSong || searchResult;
 
+	if (searchResult != null && !regexYT.test(searchResult))
+		return interaction.followUp({ content: "I couldn't find a song with that query, please try again." });
 	if (!regexYT.test(youtubeSong)) return interaction.followUp({ content: "That's not a valid YouTube URL.", ephemeral: true });
 
 	// Generate the filePath so that we know what we're working with.
@@ -126,7 +142,13 @@ exports.help = {
 			type: "STRING",
 			name: "youtube",
 			description: "A YouTube URL",
-			required: true,
+			required: false,
+		},
+		{
+			type: "STRING",
+			name: "search",
+			description: "What you want to search youtube for.",
+			required: false,
 		},
 	],
 	aliases: [""],
