@@ -44,6 +44,17 @@ function getFilePath(filePath) {
  * @returns True or False based on whether it exists or not.
  */
 function checkCache(filePath) {
+	const ytId = filePath.substr(filePath.length - 15, 11);
+	const audioFiles = fs.readdirSync("./bot/audioCache");
+
+	// The only thing worrying about this is that it's a N time.
+	// No idea how this would perform in say a 10000 item array.
+	for (const audioFile of audioFiles) {
+		const fileId = audioFile.substr(audioFile.length - 15, 11);
+
+		if (fileId == ytId) return true;
+	}
+
 	return fs.existsSync(`${filePath}`);
 }
 
