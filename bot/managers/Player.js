@@ -30,8 +30,8 @@ function destroy(guildId) {
 
 /**
  * Play something in the bot.
- * @param {Interaction} interaction - The interaction that caused this command.
- * @param {VoiceConnection} connection - The connection currently in use.
+ * @param {import("discord.js").Interaction} interaction - The interaction that caused this command.
+ * @param {import("@discordjs/voice").VoiceConnection} connection - The connection currently in use.
  */
 function play(interaction, connection) {
 	// If we don't have an audio player, we make one.
@@ -84,7 +84,7 @@ function getPlayer(guildId) {
 /**
  * Set the volume of the current audioResource.
  * @param {BigInt} guildId - The guild's ID from discord.
- * @param {Integer} volume - The percent that you want the volume to be in integer form.
+ * @param {Number} volume - The percent that you want the volume to be in integer form.
  */
 function setVolume(guildId, volume) {
 	queueManager.getCurrentSong(guildId).volume.setVolume(volume / 100);
@@ -93,7 +93,7 @@ function setVolume(guildId, volume) {
 /**
  * Get the volume of the current song.
  * @param {BigInt} guildId - The guild's ID from discord.
- * @returns The volume as a number.
+ * @returns {Number} The volume as a number.
  */
 function getVolume(guildId) {
 	return queueManager.getCurrentSong(guildId).volume.volume;

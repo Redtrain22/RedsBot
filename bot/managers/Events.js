@@ -6,6 +6,7 @@ const events = new Collection();
 
 /**
  * Initialize the Event Manager.
+ * @param {import("discord.js").Client} client - The Client to bind the event manager to.
  */
 function init(client) {
 	const eventFiles = fs.readdirSync("./bot/events");
@@ -22,6 +23,7 @@ function init(client) {
 
 /**
  * Destroy the Event Manager.
+ * @param {import("discord.js").Client} client - The client with the event manager to destroy.
  */
 function destroy(client) {
 	log("Destroying Event Manager, Discord.JS Events will no longer register.");
@@ -35,7 +37,7 @@ function destroy(client) {
 
 /**
  * Reload an event.
- * @param {Client} client A Discord.JS client to bind the event to.
+ * @param {import("discord.js").Client} client A Discord.JS client to bind the event to.
  * @param {String} eventName The nname of the event to register.
  */
 function reloadEvent(client, eventName) {
@@ -48,7 +50,7 @@ function reloadEvent(client, eventName) {
 
 /**
  * Register an Event by name with the event callback.
- * @param {Client} client A Discord.JS client to bind the event to.
+ * @param {import("discord.js").Client} client A Discord.JS client to bind the event to.
  * @param {String} eventName The name of the event to register. Must be in the events Collection, and be named like Discord.JS events.
  */
 function registerEvent(client, eventName) {

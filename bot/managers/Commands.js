@@ -55,7 +55,7 @@ function reloadCommand(commandName) {
 
 /**
  * Register slash commands.
- * @param {Client} client A Discord.JS client to register the slash commands to.
+ * @param {import("discord.js").Client} client A Discord.JS client to register the slash commands to.
  */
 async function registerSlashCommands(client) {
 	const slashCommands = [];
@@ -85,7 +85,7 @@ async function registerSlashCommands(client) {
 
 /**
  * Unregister slash commands from discord.
- * @param {Client} client - A Discord.JS client instance to remove the slash commands from.
+ * @param {import("discord.js").Client} client - A Discord.JS client instance to remove the slash commands from.
  * @param {BigInt} scope - A guildId to remove the commands from.
  */
 async function unregisterSlashCommands(client, scope = "global") {
@@ -103,7 +103,7 @@ async function unregisterSlashCommands(client, scope = "global") {
 
 /**
  * Loop through each guild in the client.guilds.cache Manager and set guild permissions there.
- * @param {Client} client A Discord.JS client.
+ * @param {import("discord.js").Client} client A Discord.JS client.
  */
 async function setPermissions(client) {
 	await generateCommandIds(client);
@@ -125,7 +125,7 @@ async function setPermissions(client) {
 
 /**
  * Generate command IDs from registered commands.
- * @param {Client} client A Discord.JS client.
+ * @param {import("discord.js").Client} client A Discord.JS client.
  */
 async function generateCommandIds(client) {
 	await client.application?.commands.fetch();
@@ -136,7 +136,7 @@ async function generateCommandIds(client) {
 
 /**
  * Generate permission overrides for commands.
- * @returns A collection full of permission objects for Discord under each command name.
+ * @returns {import("discord.js").Collection} A collection full of permission objects for Discord under each command name.
  */
 function generateOverrides() {
 	const permissionOverides = new Collection();
@@ -193,7 +193,7 @@ function setAliases(commandName) {
 
 /**
  * Get all the commands for the bot.
- * @returns All commands that can are ready to be loaded.
+ * @returns {import("discord.js").Collection} All commands that can are ready to be loaded.
  */
 function getCommands() {
 	return commands;
@@ -201,7 +201,7 @@ function getCommands() {
 
 /**
  * Get all the command aliases for the bot.
- * @returns A Collection that returns a command name when accessing an alias.
+ * @returns {import("discord.js").Collection} A Collection that returns a command name when accessing an alias.
  */
 function getAliases() {
 	return aliases;

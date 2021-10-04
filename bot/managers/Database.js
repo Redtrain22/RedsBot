@@ -7,6 +7,10 @@ let sequelize = createDB();
 
 let Statistic = require("../models/Statistic.js")(sequelize, DataTypes);
 
+/**
+ * Create the DB with options from the config.
+ * @returns {import("sequelize").Sequelize} A fully made Sequelize object.
+ */
 function createDB() {
 	const dialect = config.databaseType.toLowerCase();
 
@@ -62,6 +66,9 @@ function createDB() {
 	}
 }
 
+/**
+ * Initialize the database manager.
+ */
 async function init() {
 	// Reassign our sequelize variable to make sure we can access our sequelize object.
 	// The init function should only be called up first load, so that's why we do it.
@@ -78,6 +85,9 @@ async function init() {
 	}
 }
 
+/**
+ * Destroy the database manager.
+ */
 async function destroy() {
 	try {
 		await sequelize.close();

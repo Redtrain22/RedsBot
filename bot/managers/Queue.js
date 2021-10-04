@@ -41,7 +41,7 @@ function getNextSong(guildId) {
 /**
  * Get the current song in the queue.
  * @param {BigInt} guildId - The guild's ID from discord.
- * @returns The current song.
+ * @returns {import("@discordjs/voice").AudioResource} The current song.
  */
 function getCurrentSong(guildId) {
 	return currentSong.get(guildId);
@@ -50,7 +50,7 @@ function getCurrentSong(guildId) {
 /**
  * Get the queue.
  * @param {BigInt} guildId - The guild's ID from discord.
- * @returns An array containing all the queued items.
+ * @returns {import("discord.js").Collection} An array containing all the queued items.
  */
 function getQueue(guildId) {
 	return queue.get(guildId);
