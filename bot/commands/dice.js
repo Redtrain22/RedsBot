@@ -4,6 +4,7 @@ exports.run = async (client, interaction) => {
 	let amount = interaction.options.get("amount")?.value || 1;
 	const advantage = interaction.options.get("advantage")?.value;
 	const disadvantage = interaction.options.get("disadvantage")?.value;
+	const additive = interaction.options.get("additive")?.value || 0;
 
 	const rolls = [];
 
@@ -47,7 +48,10 @@ exports.run = async (client, interaction) => {
 
 	// Give our rolls to the user, the rest of the formatting is done here.
 	return await interaction.reply({
-		content: `d${sides}x${amount}: [${formattedRolls.join(", ")}]\n\nTotal: ${rolls.reduce((total, additive) => total + additive)}`,
+		content: `d${sides}x${amount}: [${formattedRolls.join(", ")}]${additive > 0 ? ` + ${additive}` : ""}\n\nTotal: ${rolls.reduce(
+			(total, rollResult) => total + rollResult,
+			additive
+		)}`,
 	});
 };
 
@@ -77,6 +81,12 @@ exports.help = {
 			type: "BOOLEAN",
 			name: "disadvantage",
 			description: "Whether the roll has disadvantage or not.",
+			required: false,
+		},
+		{
+			type: "INTEGER",
+			name: "additive",
+			description: "A number to add to the roll",
 			required: false,
 		},
 	],
