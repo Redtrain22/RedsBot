@@ -13,3 +13,6 @@ audioCache/
 
 # Flatfile Data
 data/
+
+# Build Files
+dist/
