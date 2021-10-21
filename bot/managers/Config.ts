@@ -1,8 +1,10 @@
-const fs = require("fs");
-const { log, error } = require("./Logger.js");
+import { Config } from "../types/Config";
+
+import { readFileSync, existsSync, writeFileSync, renameSync } from "fs";
+import { log, error } from "./Logger";
 
 // Make our config.json template here.
-const configTemplate = {
+const configTemplate: Config = {
 	version: "1.1.0",
 	ownerIds: [],
 	devIds: [],
@@ -18,12 +20,15 @@ const configTemplate = {
 	databaseLogging: true,
 };
 
-let config = {};
+let userConfig: Config;
 
-function init() {
-	if (fs.existsSync("./data/config.json")) {
+/**
+ * Initalize the config.
+ */
+export function init(): void {
+	if (existsSync("./data/config.json")) {
 		try {
-			config = JSON.parse(fs.readFileSync("./data/config.json"));
+			userConfig = JSON.parse(readFileSync("./data/config.json").toString());
 			log("Config loaded.");
 
 			checkFields(); // Check for fields that aren't filled.
@@ -34,14 +39,17 @@ function init() {
 		}
 	} else {
 		log("Config not found! Time to make one. Please fill out the fields.");
-		fs.writeFileSync("./data/config.json", JSON.stringify(configTemplate, null, 2));
+		writeFileSync("./data/config.json", JSON.stringify(configTemplate, null, 2));
 	}
 }
 
+/**
+ * Append to the config if there's missing fields.
+ */
 // ONLY APPEND DON'T REMOVE
-function appendConfig() {
+function appendConfig(): void {
 	// Check if config is current version.
-	if (config["version"] != configTemplate["version"]) {
+	if (userConfig["version"] != configTemplate["version"]) {
 		// Loop through the config template, because we need to check the config has all fields in the template.
 		for (const configField of Object.keys(configTemplate)) {
 			// We don't need to test these fields in here.
@@ -52,23 +60,26 @@ function appendConfig() {
 			if (configField == "adminIds") continue;
 
 			// Check if field exists.
-			if (!config[configField]) {
+			if (!userConfig[configField as keyof Config]) {
 				log(`You're missing ${configField}, adding it to config. Please set the field!`);
-				config[configField] = configTemplate[configField]; // Set the new field to the default value.
+				userConfig[configField as keyof Config] = configTemplate[configField as keyof Config] as never; // Set the new field to the default value.
 			}
 		}
 
 		// Set the correct version.
-		config["version"] = configTemplate["version"];
+		userConfig["version"] = configTemplate["version"];
 
 		// Back up the file because we're not perfect.
 		log("Backing up the config before updating, you can find the old one at ./data/config.json.bak");
-		fs.renameSync("./data/config.json", "./data/config.json.bak");
-		fs.writeFileSync("./data/config.json", JSON.stringify(config, null, 2));
+		renameSync("./data/config.json", "./data/config.json.bak");
+		writeFileSync("./data/config.json", JSON.stringify(userConfig, null, 2));
 	}
 }
 
-function checkFields() {
+/**
+ * Check the fields of the config.
+ */
+function checkFields(): void {
 	for (const configField of Object.keys(configTemplate)) {
 		// We don't need to test these fields in here.
 		// Version should now be the new "default value".
@@ -80,17 +91,16 @@ function checkFields() {
 		if (configField == "adminIds") continue;
 
 		// Check if config[configField] is there AND if the field is the default value.
-		if (config[configField] && config[configField] == configTemplate[configField]) {
+		if (userConfig[configField as keyof Config] && userConfig[configField as keyof Config] == configTemplate[configField as keyof Config]) {
 			log(`You didn't set ${configField} in your config. Please set the field!`);
 		}
 	}
 }
 
-function getConfig() {
-	return config;
+/**
+ * Get the config of the bot.
+ * @returns The config of the bot.
+ */
+export function getConfig(): Config {
+	return userConfig;
 }
-
-module.exports = {
-	init,
-	getConfig,
-};
