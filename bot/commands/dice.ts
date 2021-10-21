@@ -1,10 +1,11 @@
-exports.run = async (client, interaction) => {
-	// Don't need to use option chaining because this option is required.
-	const sides = interaction.options.get("sides").value;
-	let amount = interaction.options.get("amount")?.value || 1;
-	const advantage = interaction.options.get("advantage")?.value;
-	const disadvantage = interaction.options.get("disadvantage")?.value;
-	const additive = interaction.options.get("additive")?.value || 0;
+import { ApplicationCommandOptionData, Client, CommandInteraction } from "discord.js";
+
+export const run = async (client: Client, interaction: CommandInteraction): Promise<void> => {
+	const sides = interaction.options.getInteger("sides", true);
+	let amount = interaction.options.getInteger("amount") || 1;
+	const advantage = interaction.options.getBoolean("advantage") || false;
+	const disadvantage = interaction.options.getBoolean("disadvantage") || false;
+	const additive = interaction.options.getInteger("additive") || 0;
 
 	const rolls = [];
 
@@ -49,13 +50,13 @@ exports.run = async (client, interaction) => {
 	// Give our rolls to the user, the rest of the formatting is done here.
 	return await interaction.reply({
 		content: `d${sides}x${amount}: [${formattedRolls.join(", ")}]${additive > 0 ? ` + ${additive}` : ""}\n\nTotal: ${rolls.reduce(
-			(total, rollResult) => total + rollResult,
+			(total: number, rollResult: number) => total + rollResult,
 			additive
 		)}`,
 	});
 };
 
-exports.help = {
+export const help = {
 	name: "dice",
 	description: "Roll a die or roll several dice.",
 	options: [
@@ -89,11 +90,11 @@ exports.help = {
 			description: "A number to add to the roll",
 			required: false,
 		},
-	],
+	] as ApplicationCommandOptionData[],
 	aliases: [""],
 	level: "User",
 };
 
-exports.config = {
+export const config = {
 	enabled: true,
 };
