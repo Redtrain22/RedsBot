@@ -20,7 +20,6 @@ export async function init(): Promise<void> {
 		if (!fileName.endsWith(".js")) continue;
 
 		const command: Command = await import(`../commands/${fileName}`);
-		log(command.help);
 
 		log(`Loading command ${command.help.name.toLowerCase()}`);
 		commands.set(command.help.name.toLowerCase(), command);
