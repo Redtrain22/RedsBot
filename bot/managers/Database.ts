@@ -1,17 +1,19 @@
-const { Sequelize, DataTypes } = require("sequelize");
-const config = require("./Config.js").getConfig();
-const logger = require("./Logger.js");
+import { Sequelize, DataTypes, Dialect } from "sequelize";
+import { getConfig } from "./Config";
+const config = getConfig();
+import * as logger from "./Logger.js";
 
 // Delcare our sequelize object here.
 let sequelize = createDB();
 
-let Statistic = require("../models/Statistic.js")(sequelize, DataTypes);
+// Declare our models here.
+import { Statistic } from "../models/Statistic";
 
 /**
  * Create the DB with options from the config.
- * @returns {import("sequelize").Sequelize} A fully made Sequelize object.
+ * @returns A fully made Sequelize object.
  */
-function createDB() {
+function createDB(): Sequelize {
 	const dialect = config.databaseType.toLowerCase();
 
 	switch (dialect) {
@@ -22,7 +24,7 @@ function createDB() {
 				// Where the sqlite3 database will sit.
 				storage: "./data/data.sqlite",
 
-				logging: config.databaseLogging ? (query) => logger.log(query, "database") : false,
+				logging: config.databaseLogging ? (query: unknown) => logger.log(query, "database") : false,
 
 				pool: {
 					// Max number of clients
@@ -38,7 +40,7 @@ function createDB() {
 
 		default:
 			return new Sequelize({
-				dialect: dialect,
+				dialect: dialect as Dialect,
 
 				host: config.databaseHost,
 
@@ -69,16 +71,15 @@ function createDB() {
 /**
  * Initialize the database manager.
  */
-async function init() {
+export async function init(): Promise<void> {
 	// Reassign our sequelize variable to make sure we can access our sequelize object.
 	// The init function should only be called up first load, so that's why we do it.
 	// If the connection is closed then the sequelize.connectionManager.getConnection will throw an error and crash the application.
 	sequelize = createDB();
 
-	Statistic = require("../models/Statistic.js")(sequelize, DataTypes);
-
 	try {
 		await sequelize.authenticate();
+		tableInit();
 		await sequelize.sync();
 	} catch (error) {
 		logger.error(error);
@@ -88,7 +89,7 @@ async function init() {
 /**
  * Destroy the database manager.
  */
-async function destroy() {
+export async function destroy(): Promise<void> {
 	try {
 		await sequelize.close();
 	} catch (error) {
@@ -96,8 +97,20 @@ async function destroy() {
 	}
 }
 
-module.exports = {
-	init,
-	destroy,
-	Statistic,
-};
+function tableInit() {
+	Statistic.init(
+		{
+			guildId: {
+				type: DataTypes.BIGINT,
+				allowNull: false,
+			},
+			interactionCount: {
+				type: DataTypes.BIGINT,
+				defaultValue: 0,
+			},
+		},
+		{ sequelize: sequelize, modelName: "Statistic" }
+	);
+}
+
+export { Statistic } from "../models/Statistic";
