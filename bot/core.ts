@@ -1,10 +1,10 @@
-const { Client, Intents } = require("discord.js");
-const configManager = require("./managers/Config.js");
+import { Client, Intents } from "discord.js";
+import * as configManager from "./managers/Config.js";
 configManager.init(); // Initialize our config so that other managers can access it if need be.
 
-const databaseManager = require("./managers/Database.js");
-const commandManager = require("./managers/Commands.js");
-const eventManager = require("./managers/Events.js");
+import * as databaseManager from "./managers/Database";
+import * as commandManager from "./managers/Commands";
+import * as eventManager from "./managers/Events";
 
 // New instance of the discord client
 const intents = new Intents(["GUILDS", "GUILD_MESSAGES", "GUILD_BANS", "GUILD_VOICE_STATES", "DIRECT_MESSAGES"]); // Client Intents
@@ -13,20 +13,18 @@ const client = new Client({ intents: intents }); // Client has to be declared ou
 /**
  * Initialize the bot.
  */
-async function init() {
-	const config = configManager.getConfig();
-
+export async function init(): Promise<void> {
 	await databaseManager.init();
 	commandManager.init();
 	eventManager.init(client);
 
-	client.login(config.discordToken);
+	client.login(configManager.getConfig().discordToken);
 }
 
 /**
  * Safely Destroy the bot.
  */
-async function destroy() {
+export async function destroy(): Promise<void> {
 	eventManager.destroy(client);
 	commandManager.destroy();
 	await databaseManager.destroy();
@@ -36,7 +34,7 @@ async function destroy() {
 /**
  * Safely restart the bot.
  */
-async function restart() {
+export async function restart(): Promise<void> {
 	await destroy();
 	await init();
 }
@@ -45,14 +43,14 @@ async function restart() {
  * Reload an event.
  * @param {String} event - The name of the event to reload.
  */
-function reloadEvent(event) {
+export function reloadEvent(event: string): void {
 	eventManager.reloadEvent(client, event);
 }
 
 /**
  * Reload all the Events on the bot.
  */
-function reloadEvents() {
+export function reloadEvents(): void {
 	eventManager.destroy(client);
 	eventManager.init(client);
 }
@@ -61,23 +59,23 @@ function reloadEvents() {
  * Reload a command.
  * @param {String} command - The name of the command to reload.
  */
-function reloadCommand(command) {
+export function reloadCommand(command: string): void {
 	commandManager.reloadCommand(command);
 }
 
 /**
  * Reload all Commands on the bot.
  */
-function reloadCommands() {
+export function reloadCommands(): void {
 	commandManager.destroy();
 	commandManager.init();
 }
 
-async function registerSlashCommands() {
+export async function registerSlashCommands(): Promise<void> {
 	await commandManager.registerSlashCommands(client);
 }
 
-async function unregisterSlashCommands(args) {
+export async function unregisterSlashCommands(args: string): Promise<void> {
 	// Check length because we might want to do global commands.
 	if (args.length == 0) {
 		await commandManager.unregisterSlashCommands(client);
@@ -85,15 +83,3 @@ async function unregisterSlashCommands(args) {
 		await commandManager.unregisterSlashCommands(client, args);
 	}
 }
-
-module.exports = {
-	init,
-	destroy,
-	restart,
-	reloadEvent,
-	reloadEvents,
-	reloadCommand,
-	reloadCommands,
-	registerSlashCommands,
-	unregisterSlashCommands,
-};
