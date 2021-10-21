@@ -1,22 +1,26 @@
-const { Collection } = require("discord.js");
-const fs = require("fs");
-const { log } = require("./Logger");
-const config = require("../managers/Config.js").getConfig();
+import { Command } from "../types/Command";
 
-const commands = new Collection();
-const aliases = new Collection();
-const commandIds = new Collection();
+import { ApplicationCommandPermissionData, Client, Collection } from "discord.js";
+import fs from "fs";
+import { log } from "./Logger";
+import { getConfig } from "./Config";
+const config = getConfig();
+
+const commands = new Collection<string, Command>();
+const aliases = new Collection<string, string>();
+const commandIds = new Collection<string, string>();
 
 /**
  * Initialize the Command Manager.
  */
-function init() {
+export async function init(): Promise<void> {
 	const commandFiles = fs.readdirSync("./bot/commands");
 
 	for (const fileName of commandFiles) {
 		if (!fileName.endsWith(".js")) continue;
 
-		const command = require(`../commands/${fileName}`);
+		const command: Command = await import(`../commands/${fileName}`);
+		log(command.help);
 
 		log(`Loading command ${command.help.name.toLowerCase()}`);
 		commands.set(command.help.name.toLowerCase(), command);
@@ -27,7 +31,7 @@ function init() {
 /**
  * Destroy the Command Manager.
  */
-function destroy() {
+export function destroy(): void {
 	log("Destroying Command Manager, commands won't work anymore.");
 
 	commands.forEach((command) => {
@@ -39,15 +43,15 @@ function destroy() {
 
 /**
  * Reload a command.
- * @param {String} commandName - The name of the command to reload.
+ * @param commandName - The name of the command to reload.
  */
-function reloadCommand(commandName) {
+export async function reloadCommand(commandName: string): Promise<void> {
 	log(`Unloading Command ${commandName}`);
 	commands.delete(commandName);
 	delete require.cache[require.resolve(`../commands/${commandName}.js`)];
 	log(`Loading Command ${commandName}`);
 
-	const command = require(`../commands/${commandName}.js`);
+	const command = await import(`../commands/${commandName}`);
 
 	commands.set(commandName, command);
 	setAliases(command.help.name.toLowerCase());
@@ -55,9 +59,9 @@ function reloadCommand(commandName) {
 
 /**
  * Register slash commands.
- * @param {import("discord.js").Client} client A Discord.JS client to register the slash commands to.
+ * @param client - A Discord.JS client to register the slash commands to.
  */
-async function registerSlashCommands(client) {
+export async function registerSlashCommands(client: Client): Promise<void> {
 	const slashCommands = [];
 
 	for (const [, command] of commands) {
@@ -65,17 +69,10 @@ async function registerSlashCommands(client) {
 		const commandName = command.help.name.toLowerCase();
 		if (command.help.level == "User") {
 			slashCommands.push({ name: commandName, description: command.help.description, options: command.help.options });
-		} else {
-			slashCommands.push({
-				name: commandName,
-				description: command.help.description,
-				options: command.help.options,
-				defaultPermission: false,
-			});
 		}
 	}
 
-	await client.application.fetch();
+	await client.application?.fetch();
 	await client.application?.commands.set(slashCommands);
 	log("Set Slash Commands.");
 
@@ -85,38 +82,38 @@ async function registerSlashCommands(client) {
 
 /**
  * Unregister slash commands from discord.
- * @param {import("discord.js").Client} client - A Discord.JS client instance to remove the slash commands from.
- * @param {BigInt} scope - A guildId to remove the commands from.
+ * @param client - A Discord.JS client instance to remove the slash commands from.
+ * @param scope - A guildId to remove the commands from.
  */
-async function unregisterSlashCommands(client, scope = "global") {
+export async function unregisterSlashCommands(client: Client, scope = "global"): Promise<void> {
 	if (client.application?.commands) await client.application?.fetch();
 
 	if (scope == "global") {
-		await client.application.commands.set([]);
+		await client.application?.commands.set([]);
 		log("Unregistered slash commands globally, please register them again to have global commands.");
 	} else {
 		const guild = client.guilds.cache.get(scope);
-		await guild.commands.set([]);
-		log(`Unregistered slash commands in "${guild.name}" (${guild.id})`);
+		await guild?.commands.set([]);
+		log(`Unregistered slash commands in "${guild?.name}" (${guild?.id})`);
 	}
 }
 
 /**
  * Loop through each guild in the client.guilds.cache Manager and set guild permissions there.
- * @param {import("discord.js").Client} client A Discord.JS client.
+ * @param client - A Discord.JS client.
  */
-async function setPermissions(client) {
+async function setPermissions(client: Client) {
 	await generateCommandIds(client);
 
 	const overrides = generateOverrides();
 	for (const [guildId, guild] of client.guilds.cache) {
 		for (const [commandName, permissions] of overrides) {
-			const guild = await client.guilds.cache.get(guildId);
+			const guild = client.guilds.cache.get(guildId);
 
 			// If the command doesn't exist as an ID we're going to ignore it.
 			if (commandIds.get(commandName) == undefined) continue;
 
-			await guild.commands.permissions.add({ command: commandIds.get(commandName), permissions: permissions });
+			await guild?.commands.permissions.add({ command: commandIds.get(commandName) as string, permissions: permissions });
 		}
 
 		log(`Set slash command permissions in guild "${guild.name}"`);
@@ -125,9 +122,9 @@ async function setPermissions(client) {
 
 /**
  * Generate command IDs from registered commands.
- * @param {import("discord.js").Client} client A Discord.JS client.
+ * @param client - A Discord.JS client.
  */
-async function generateCommandIds(client) {
+async function generateCommandIds(client: Client) {
 	await client.application?.commands.fetch();
 	client.application?.commands.cache.forEach((command, id) => {
 		commandIds.set(command.name, id);
@@ -136,10 +133,10 @@ async function generateCommandIds(client) {
 
 /**
  * Generate permission overrides for commands.
- * @returns {import("discord.js").Collection} A collection full of permission objects for Discord under each command name.
+ * @returns A collection full of permission objects for Discord under each command name.
  */
 function generateOverrides() {
-	const permissionOverides = new Collection();
+	const permissionOverides = new Collection<string, ApplicationCommandPermissionData[]>();
 
 	for (const [, command] of commands) {
 		// console.log(command.help.name);
@@ -151,18 +148,17 @@ function generateOverrides() {
 				permissionOverides.set(
 					commandName,
 					permissionOverides.get(commandName)
-						? permissionOverides.get(commandName).concat({ id: devId, type: "USER", permission: true })
+						? (permissionOverides.get(commandName)?.concat({ id: devId, type: "USER", permission: true }) as ApplicationCommandPermissionData[])
 						: [{ id: devId, type: "USER", permission: true }]
 				);
 			});
 		}
-
 		if (command.help.level == "Admin") {
 			config.adminIds.forEach((adminId) => {
 				permissionOverides.set(
 					commandName,
 					permissionOverides.get(commandName)
-						? permissionOverides.get(commandName).concat({ id: adminId, type: "USER", permission: true })
+						? (permissionOverides.get(commandName)?.concat({ id: adminId, type: "USER", permission: true }) as ApplicationCommandPermissionData[])
 						: [{ id: adminId, type: "USER", permission: true }]
 				);
 			});
@@ -172,7 +168,7 @@ function generateOverrides() {
 			permissionOverides.set(
 				commandName,
 				permissionOverides.get(commandName)
-					? permissionOverides.get(commandName).concat({ id: ownerId, type: "USER", permission: true })
+					? (permissionOverides.get(commandName)?.concat({ id: ownerId, type: "USER", permission: true }) as ApplicationCommandPermissionData[])
 					: [{ id: ownerId, type: "USER", permission: true }]
 			);
 		});
@@ -183,27 +179,27 @@ function generateOverrides() {
 
 /**
  * Set the aliases of a command from the commands collections.
- * @param {String} commandName The commandName to get from the command collection to register our aliases for.
+ * @param commandName - The commandName to get from the command collection to register our aliases for.
  */
-function setAliases(commandName) {
-	commands.get(commandName).help.aliases.forEach((alias) => {
+export function setAliases(commandName: string): void {
+	commands.get(commandName)?.help.aliases.forEach((alias) => {
 		aliases.set(alias, commandName);
 	});
 }
 
 /**
  * Get all the commands for the bot.
- * @returns {import("discord.js").Collection} All commands that can are ready to be loaded.
+ * @returns All commands that can are ready to be loaded.
  */
-function getCommands() {
+export function getCommands(): Collection<string, Command> {
 	return commands;
 }
 
 /**
  * Get all the command aliases for the bot.
- * @returns {import("discord.js").Collection} A Collection that returns a command name when accessing an alias.
+ * @returns A Collection that returns a command name when accessing an alias.
  */
-function getAliases() {
+export function getAliases(): Collection<string, string> {
 	return aliases;
 }
 
