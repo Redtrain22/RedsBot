@@ -15,8 +15,8 @@ const client = new Client({ intents: intents }); // Client has to be declared ou
  */
 export async function init(): Promise<void> {
 	await databaseManager.init();
-	commandManager.init();
-	eventManager.init(client);
+	await commandManager.init();
+	await eventManager.init(client);
 
 	client.login(configManager.getConfig().discordToken);
 }
@@ -43,32 +43,32 @@ export async function restart(): Promise<void> {
  * Reload an event.
  * @param {String} event - The name of the event to reload.
  */
-export function reloadEvent(event: string): void {
-	eventManager.reloadEvent(client, event);
+export async function reloadEvent(event: string): Promise<void> {
+	await eventManager.reloadEvent(client, event);
 }
 
 /**
  * Reload all the Events on the bot.
  */
-export function reloadEvents(): void {
+export async function reloadEvents(): Promise<void> {
 	eventManager.destroy(client);
-	eventManager.init(client);
+	await eventManager.init(client);
 }
 
 /**
  * Reload a command.
  * @param {String} command - The name of the command to reload.
  */
-export function reloadCommand(command: string): void {
-	commandManager.reloadCommand(command);
+export async function reloadCommand(command: string): Promise<void> {
+	await commandManager.reloadCommand(command);
 }
 
 /**
  * Reload all Commands on the bot.
  */
-export function reloadCommands(): void {
+export async function reloadCommands(): Promise<void> {
 	commandManager.destroy();
-	commandManager.init();
+	await commandManager.init();
 }
 
 export async function registerSlashCommands(): Promise<void> {

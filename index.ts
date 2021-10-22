@@ -29,20 +29,20 @@ async function handleTerminal(input: string) {
 
 		case "reloadEvent":
 			// We pass args[0] since we're only reloading one event.
-			bot.reloadEvent(args[0]);
+			await bot.reloadEvent(args[0]);
 			break;
 
 		case "reloadEvents":
-			bot.reloadEvents();
+			await bot.reloadEvents();
 			break;
 
 		case "reloadCommand":
 			// We pass args[0] since we're only reloading one command.
-			bot.reloadCommand(args[0]);
+			await bot.reloadCommand(args[0]);
 			break;
 
 		case "reloadCommands":
-			bot.reloadCommands();
+			await bot.reloadCommands();
 			break;
 
 		case "registerSlashCommands":
