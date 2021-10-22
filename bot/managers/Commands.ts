@@ -17,7 +17,7 @@ export async function init(): Promise<void> {
 	const commandFiles = fs.readdirSync("./bot/commands");
 
 	for (const fileName of commandFiles) {
-		if (!fileName.endsWith(".js")) continue;
+		if (!fileName.endsWith(".ts")) continue;
 
 		const command: Command = await import(`../commands/${fileName}`);
 
@@ -34,7 +34,7 @@ export function destroy(): void {
 	log("Destroying Command Manager, commands won't work anymore.");
 
 	commands.forEach((command) => {
-		delete require.cache[require.resolve(`../commands/${command.help.name}.js`)];
+		delete require.cache[require.resolve(`../commands/${command.help.name}`)];
 	});
 
 	commands.clear();
@@ -182,7 +182,7 @@ function generateOverrides() {
  */
 export function setAliases(commandName: string): void {
 	commands.get(commandName)?.help.aliases.forEach((alias) => {
-		aliases.set(alias, commandName);
+		if (!(alias == "")) aliases.set(alias, commandName);
 	});
 }
 

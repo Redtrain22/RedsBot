@@ -13,7 +13,7 @@ export async function init(client: Client): Promise<void> {
 	const eventFiles = fs.readdirSync("./bot/events");
 
 	for (const fileName of eventFiles) {
-		if (!fileName.endsWith(".js")) continue;
+		if (!fileName.endsWith(".ts")) continue;
 
 		const eventName = fileName.slice(0, fileName.length - 3);
 
@@ -71,7 +71,7 @@ export function unregisterEvent(client: Client, eventName: string): void {
 	client.removeAllListeners(eventName);
 	events.delete(eventName);
 	// Uncache the event so that it's not in memory anymore.
-	delete require.cache[require.resolve(`../events/${eventName}.js`)];
+	delete require.cache[require.resolve(`../events/${eventName}`)];
 }
 
 module.exports = {
