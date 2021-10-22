@@ -1,7 +1,7 @@
 import { Sequelize, DataTypes, Dialect } from "sequelize";
 import { getConfig } from "./Config";
 const config = getConfig();
-import * as logger from "./Logger.js";
+import * as logger from "./Logger";
 
 // Delcare our sequelize object here.
 let sequelize = createDB();

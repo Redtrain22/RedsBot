@@ -1,7 +1,7 @@
 import { Client, Collection } from "discord.js";
 import fs from "fs";
-import { log } from "../managers/Logger.js";
-import { Event } from "../types/Event.js";
+import { log } from "../managers/Logger";
+import { Event } from "../types/Event";
 
 const events = new Collection<string, Event>();
 
