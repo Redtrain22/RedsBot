@@ -2,7 +2,7 @@ import * as queueManager from "../managers/Queue";
 import * as playerManager from "../managers/Player";
 import { Client, CommandInteraction } from "discord.js";
 
-export const run = async (client: Client, interaction: CommandInteraction): Promise<void> => {
+async function run(client: Client, interaction: CommandInteraction): Promise<void> {
 	const songNumber = interaction.options.getInteger("song");
 	if (interaction.guild == null) return await interaction.reply({ content: "Please run this command from a guild." });
 
@@ -15,9 +15,9 @@ export const run = async (client: Client, interaction: CommandInteraction): Prom
 		playerManager.getPlayer(interaction.guild.id)?.stop();
 		return await interaction.reply({ content: `Skipped currently playing song. The current song was ${currentSong?.metadata.youtubeURL}` });
 	}
-};
+}
 
-export const help = {
+const help = {
 	name: "skip",
 	description: "Skip the current song, or a song in the queue.",
 	options: [
@@ -31,6 +31,9 @@ export const help = {
 	aliases: [],
 	level: "User",
 };
-export const config = {
+
+const config = {
 	enabled: true,
 };
+
+export { run, help, config };

@@ -1,6 +1,6 @@
 import { ApplicationCommandOptionData, Client, CommandInteraction } from "discord.js";
 
-export const run = async (client: Client, interaction: CommandInteraction): Promise<void> => {
+async function run(client: Client, interaction: CommandInteraction): Promise<void> {
 	const sides = interaction.options.getInteger("sides", true);
 	let amount = interaction.options.getInteger("amount") || 1;
 	const advantage = interaction.options.getBoolean("advantage") || false;
@@ -54,9 +54,9 @@ export const run = async (client: Client, interaction: CommandInteraction): Prom
 			additive
 		)}`,
 	});
-};
+}
 
-export const help = {
+const help = {
 	name: "dice",
 	description: "Roll a die or roll several dice.",
 	options: [
@@ -95,6 +95,8 @@ export const help = {
 	level: "User",
 };
 
-export const config = {
+const config = {
 	enabled: true,
 };
+
+export { run, help, config };

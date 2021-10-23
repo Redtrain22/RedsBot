@@ -2,7 +2,7 @@ import { Client, CommandInteraction } from "discord.js";
 import * as playerManager from "../managers/Player";
 import * as queueManager from "../managers/Queue";
 
-export const run = async (client: Client, interaction: CommandInteraction): Promise<void> => {
+async function run(client: Client, interaction: CommandInteraction): Promise<void> {
 	if (interaction.guild == null) {
 		await interaction.reply({ content: "Please run this command inside a guild." });
 		return;
@@ -11,9 +11,9 @@ export const run = async (client: Client, interaction: CommandInteraction): Prom
 	playerManager.destroy(interaction.guild.id);
 	queueManager.destroy(interaction.guild.id);
 	await interaction.reply({ content: "Left the channel and cleared the queue." });
-};
+}
 
-export const help = {
+const help = {
 	name: "stop",
 	description: "Stops the bot from playing music and clears the queue.",
 	options: [],
@@ -21,6 +21,8 @@ export const help = {
 	level: "User",
 };
 
-export const config = {
+const config = {
 	enabled: true,
 };
+
+export { run, help, config };

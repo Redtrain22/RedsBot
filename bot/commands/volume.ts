@@ -1,7 +1,7 @@
 import { Client, CommandInteraction } from "discord.js";
 import * as playerManager from "../managers/Player";
 
-export const run = async (client: Client, interaction: CommandInteraction): Promise<void> => {
+async function run(client: Client, interaction: CommandInteraction): Promise<void> {
 	const volume = interaction.options.getInteger("volume");
 
 	if (interaction.guild == null) return await interaction.reply({ content: "Please run this command from a guild." });
@@ -12,9 +12,9 @@ export const run = async (client: Client, interaction: CommandInteraction): Prom
 	} else {
 		return await interaction.reply({ content: `Current Volume: ${playerManager.getVolume(interaction.guild.id) || 0.5 * 100}` });
 	}
-};
+}
 
-export const help = {
+const help = {
 	name: "volume",
 	description: "Shows or edits the current volume.",
 	options: [
@@ -29,6 +29,8 @@ export const help = {
 	level: "User",
 };
 
-export const config = {
+const config = {
 	enabled: true,
 };
+
+export { run, help, config };

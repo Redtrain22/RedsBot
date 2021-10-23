@@ -1,6 +1,6 @@
 import { Client, CommandInteraction, Message, MessageEmbed } from "discord.js";
 
-export const run = async (client: Client, interaction: CommandInteraction): Promise<void> => {
+async function run(client: Client, interaction: CommandInteraction): Promise<void> {
 	function msToTime(ms: number) {
 		const days = Math.floor(ms / 86400000); // 24*60*60*1000
 		const daysms = ms % 86400000; // 24*60*60*1000
@@ -30,9 +30,9 @@ export const run = async (client: Client, interaction: CommandInteraction): Prom
 	`);
 
 	await interaction.editReply({ embeds: [pong] });
-};
+}
 
-export const help = {
+const help = {
 	name: "ping",
 	description: "Ping... Pong!",
 	options: [],
@@ -40,6 +40,8 @@ export const help = {
 	level: "User",
 };
 
-export const config = {
+const config = {
 	enabled: true,
 };
+
+export { run, help, config };

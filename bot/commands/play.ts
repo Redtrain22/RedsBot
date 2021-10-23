@@ -85,7 +85,7 @@ async function searchSong(query: string | null): Promise<string | null> {
 	return results.currentPage?.first()?.url as string;
 }
 
-export const run = async (client: Client, interaction: CommandInteraction): Promise<void> => {
+async function run(client: Client, interaction: CommandInteraction): Promise<void> {
 	await interaction.deferReply();
 
 	if (interaction.guild == null) {
@@ -183,9 +183,9 @@ export const run = async (client: Client, interaction: CommandInteraction): Prom
 			}
 		});
 	}
-};
+}
 
-export const help = {
+const help = {
 	name: "play",
 	description: "Play a song in the bot.",
 	options: [
@@ -206,6 +206,8 @@ export const help = {
 	level: "User",
 };
 
-export const config = {
+const config = {
 	enabled: true,
 };
+
+export { run, help, config };

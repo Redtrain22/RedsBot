@@ -1,7 +1,7 @@
 import { MessageEmbed, Client, CommandInteraction } from "discord.js";
 import * as queueManager from "../managers/Queue";
 
-exports.run = async (client: Client, interaction: CommandInteraction) => {
+async function run(client: Client, interaction: CommandInteraction): Promise<void> {
 	if (interaction.guild == null) return await interaction.reply({ content: "Please run this command from a guild." });
 
 	const pageNum = interaction.options.getInteger("page");
@@ -42,9 +42,9 @@ exports.run = async (client: Client, interaction: CommandInteraction) => {
 	}
 
 	await interaction.reply({ embeds: [queue] });
-};
+}
 
-exports.help = {
+const help = {
 	name: "queue",
 	description: "Shows the music queue",
 	options: [
@@ -59,6 +59,8 @@ exports.help = {
 	level: "User",
 };
 
-exports.config = {
+const config = {
 	enabled: true,
 };
+
+export { run, help, config };
