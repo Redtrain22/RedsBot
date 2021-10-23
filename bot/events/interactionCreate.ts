@@ -5,7 +5,10 @@ import * as logger from "../managers/Logger";
 import { Client, Interaction } from "discord.js";
 import { Statistic } from "../managers/Database";
 
-export const run = async (client: Client, interaction: Interaction): Promise<void> => {
+const once = false;
+const name = "interactionCreate";
+
+const run = async (client: Client, interaction: Interaction): Promise<void> => {
 	// Fetch or create our statistic
 	// The reason statistic is wrapped in [] is because findOrCreate actually outputs 2 variables and we only need the first.
 	const [statistic] = await Statistic.findOrCreate({
@@ -45,3 +48,5 @@ export const run = async (client: Client, interaction: Interaction): Promise<voi
 		}
 	}
 };
+
+export { once, name, run };
