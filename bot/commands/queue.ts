@@ -1,8 +1,10 @@
-const { MessageEmbed } = require("discord.js");
-const queueManager = require("../managers/Queue.js");
+import { MessageEmbed, Client, CommandInteraction } from "discord.js";
+import * as queueManager from "../managers/Queue";
 
-exports.run = async (client, interaction) => {
-	const pageNum = interaction.options.get("page")?.value;
+exports.run = async (client: Client, interaction: CommandInteraction) => {
+	if (interaction.guild == null) return await interaction.reply({ content: "Please run this command from a guild." });
+
+	const pageNum = interaction.options.getInteger("page");
 
 	const currentQueue = queueManager.getQueue(interaction.guild.id);
 
@@ -10,9 +12,15 @@ exports.run = async (client, interaction) => {
 
 	queue.setTitle("Current Queue").setTimestamp(Date.now());
 
-	queue.setDescription(`Current Song:\n ${queueManager.getCurrentSong(interaction.guild.id).metadata.youtubeURL}`);
+	if (queueManager.getCurrentSong(interaction.guild.id) == undefined) {
+		return await interaction.reply({ embeds: [queue.setDescription("Nothing currently playing in the bot.")] });
+	} else {
+		queue.setDescription(`Current Song:\n ${queueManager.getCurrentSong(interaction.guild.id)?.metadata?.youtubeURL}`);
+	}
 
-	if (pageNum >= 2) {
+	if (currentQueue == undefined) return await interaction.reply({ embeds: [queue.addField("Nothing in queue", "")] });
+
+	if (pageNum != null && pageNum >= 2) {
 		// Check if this page can actually be populated, atleast partially
 		if (currentQueue.length > 25 * (pageNum - 1)) {
 			for (let i = 25 * (pageNum - 1); i < 25 * pageNum; i++) {
