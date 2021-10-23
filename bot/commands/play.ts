@@ -1,11 +1,22 @@
-const fs = require("fs");
-const youtube = require("youtube-dl-exec");
-const queueManager = require("../managers/Queue.js");
-const playerManager = require("../managers/Player.js");
-const logger = require("../managers/Logger.js");
-const { YTSearcher } = require("ytsearcher");
-const { youtubeToken } = require("../managers/Config.js").getConfig();
-const { getVoiceConnection, joinVoiceChannel, VoiceConnectionStatus, createAudioResource, StreamType, entersState } = require("@discordjs/voice");
+import * as fs from "fs";
+import * as youtube from "youtube-dl-exec";
+import * as queueManager from "../managers/Queue";
+import * as playerManager from "../managers/Player";
+import * as logger from "../managers/Logger";
+import { YTSearcher } from "ytsearcher";
+import { getConfig } from "../managers/Config";
+const youtubeToken = getConfig().youtubeToken;
+import {
+	getVoiceConnection,
+	joinVoiceChannel,
+	VoiceConnectionStatus,
+	createAudioResource,
+	StreamType,
+	entersState,
+	VoiceConnection,
+} from "@discordjs/voice";
+import { Client, CommandInteraction, GuildMember } from "discord.js";
+import { PlayerMetadata } from "../types/PlayerMetadata";
 
 const regexYT = new RegExp("(^(https?\\:\\/\\/)?(www\\.youtube\\.com|youtu\\.be)\\/(watch\\?v=.{11}|.{11})$)|(^.{11}$)");
 const ytSearcher = new YTSearcher(youtubeToken);
@@ -29,10 +40,10 @@ const downloadOptions = {
 
 /**
  * Get the ogg file path from the file path passed.
- * @param {String} fileName - The name of the file in the cache.
+ * @param fileName - The name of the file in the cache.
  * @returns The file path that it will be after transcoding it to ogg.
  */
-function getFilePath(filePath) {
+function getFilePath(filePath: string): string {
 	const oggFilePath = filePath.substr(0, filePath.lastIndexOf(".")).concat(".ogg");
 
 	return oggFilePath;
@@ -40,10 +51,10 @@ function getFilePath(filePath) {
 
 /**
  * A pure file path to check to see if it exists.
- * @param {String} filePath - The path to a file that we want to check.
+ * @param filePath - The path to a file that we want to check.
  * @returns True or False based on whether it exists or not.
  */
-function checkCache(filePath) {
+function checkCache(filePath: string): boolean {
 	const ytId = filePath.substr(filePath.length - 15, 11);
 	const audioFiles = fs.readdirSync("./bot/audioCache");
 
@@ -58,29 +69,54 @@ function checkCache(filePath) {
 	return fs.existsSync(`${filePath}`);
 }
 
-async function searchSong(query) {
-	if (query == undefined) return null;
+/**
+ * Search a songn on youtube.
+ * @param query - The query to search youtube with.
+ * @returns A youtube URL or null
+ */
+async function searchSong(query: string | null): Promise<string | null> {
+	if (query == null) return null;
 	const results = await ytSearcher.search(query, { type: "video" });
 
-	return results.currentPage.first().url;
+	if (results.currentPage?.first() == null) return null;
+
+	if (results.currentPage?.first()?.url == undefined) return null;
+
+	return results.currentPage?.first()?.url as string;
 }
 
-// async function checkSong(songURL) {}
-
-exports.run = async (client, interaction) => {
+export const run = async (client: Client, interaction: CommandInteraction): Promise<void> => {
 	await interaction.deferReply();
 
-	if (interaction.guild == null) return interaction.followUp({ content: "Please use the command in a guild", ephemeral: true });
+	if (interaction.guild == null) {
+		await interaction.followUp({ content: "Please use the command in a guild", ephemeral: true });
+		return;
+	}
 
-	if (!interaction.member.voice.channel) return interaction.followUp({ content: "Please join a voice channel to use this command", ephemeral: true });
+	// If the user isn't in voice, tell them to join.
+	if (!((interaction.member as GuildMember).voice.channel?.type == "GUILD_VOICE")) {
+		await interaction.followUp({ content: "Please join a voice channel to use this command", ephemeral: true });
+		return;
+	}
 
-	const ytSong = interaction.options.get("youtube")?.value;
-	const searchResult = await searchSong(interaction.options.get("search")?.value);
+	const ytSong = interaction.options.getString("youtube");
+	const searchResult = await searchSong(interaction.options.getString("search"));
 	const youtubeSong = ytSong || searchResult;
 
-	if (searchResult != null && !regexYT.test(searchResult))
-		return interaction.followUp({ content: "I couldn't find a song with that query, please try again." });
-	if (!regexYT.test(youtubeSong)) return interaction.followUp({ content: "That's not a valid YouTube URL.", ephemeral: true });
+	if (searchResult == null || !regexYT.test(searchResult)) {
+		await interaction.followUp({ content: "I couldn't find a song with that query, please try again." });
+		return;
+	}
+
+	if (youtubeSong == null) {
+		await interaction.followUp({ content: "Please provid a song or a search query.", ephemeral: true });
+		return;
+	}
+
+	if (!regexYT.test(youtubeSong)) {
+		await interaction.followUp({ content: "That's not a valid YouTube URL.", ephemeral: true });
+		return;
+	}
 
 	// Generate the filePath so that we know what we're working with.
 	const filePath = getFilePath((await youtube.raw(youtubeSong, queryOptions)).stdout);
@@ -90,9 +126,9 @@ exports.run = async (client, interaction) => {
 
 	// Add the song as an AudioResource.
 	try {
-		const song = createAudioResource(fs.createReadStream(filePath), {
+		const song = createAudioResource<PlayerMetadata>(fs.createReadStream(filePath), {
 			inputType: StreamType.OggOpus,
-			metadata: { filePath: `FilePath: ${filePath}`, youtubeURL: youtubeSong },
+			metadata: { filePath: filePath, youtubeURL: youtubeSong },
 			inlineVolume: true,
 		});
 
@@ -102,19 +138,20 @@ exports.run = async (client, interaction) => {
 	}
 
 	if (getVoiceConnection(interaction.guild.id) == undefined) {
-		await interaction.followUp({ content: `Joining the channel and playing ${youtubeSong}` });
-
 		joinVoiceChannel({
-			channelId: interaction.member.voice.channelId,
+			// The channel was checked up above
+			channelId: (interaction.member as GuildMember).voice.channelId as string,
 			guildId: interaction.guild.id,
 			adapterCreator: interaction.guild.voiceAdapterCreator,
 		});
+
+		await interaction.followUp({ content: `Joining the channel and playing ${youtubeSong}` });
 	} else {
 		await interaction.followUp({ content: `Adding ${youtubeSong} to queue` });
 	}
 
 	// Initialize our connection.
-	const connection = getVoiceConnection(interaction.guild.id);
+	const connection = getVoiceConnection(interaction.guild.id) as VoiceConnection; // Voice Connection should be valid from the if statement above.
 
 	// Test if the listener count is greater than zero so that we don't register it N number of times.
 	// N being however many times the command was ran.
@@ -122,7 +159,9 @@ exports.run = async (client, interaction) => {
 		// This should only happen once.
 		connection.once(VoiceConnectionStatus.Ready, function voiceReady() {
 			playerManager.play(interaction, connection);
-			playerManager.setVolume(interaction.guild.id, 50);
+			if (interaction.guild != null) {
+				playerManager.setVolume(interaction.guild.id, 50);
+			}
 		});
 	}
 
@@ -130,6 +169,7 @@ exports.run = async (client, interaction) => {
 	// N being however many times the command was ran.
 	if (!(connection.listenerCount(VoiceConnectionStatus.Disconnected) > 0)) {
 		// Handle the bot being disconnected from the voice channel
+		// eslint-disable-next-line @typescript-eslint/no-unused-vars
 		connection.on(VoiceConnectionStatus.Disconnected, async function disconnected(oldState, newState) {
 			try {
 				await Promise.race([
@@ -145,7 +185,7 @@ exports.run = async (client, interaction) => {
 	}
 };
 
-exports.help = {
+export const help = {
 	name: "play",
 	description: "Play a song in the bot.",
 	options: [
@@ -166,6 +206,6 @@ exports.help = {
 	level: "User",
 };
 
-exports.config = {
+export const config = {
 	enabled: true,
 };
