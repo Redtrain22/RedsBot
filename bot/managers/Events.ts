@@ -73,9 +73,3 @@ export function unregisterEvent(client: Client, eventName: string): void {
 	// Uncache the event so that it's not in memory anymore.
 	delete require.cache[require.resolve(`../events/${eventName}`)];
 }
-
-module.exports = {
-	init,
-	destroy,
-	reloadEvent,
-};

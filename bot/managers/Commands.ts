@@ -201,14 +201,3 @@ export function getCommands(): Collection<string, Command> {
 export function getAliases(): Collection<string, string> {
 	return aliases;
 }
-
-module.exports = {
-	init,
-	destroy,
-	reloadCommand,
-	registerSlashCommands,
-	unregisterSlashCommands,
-	setPermissions,
-	getCommands,
-	getAliases,
-};
