@@ -1,5 +1,5 @@
 import { Client, Collection } from "discord.js";
-import fs from "fs";
+import * as fs from "fs";
 import { log } from "../managers/Logger";
 import { Event } from "../types/Event";
 
@@ -15,10 +15,10 @@ export async function init(client: Client): Promise<void> {
 	for (const fileName of eventFiles) {
 		if (!fileName.endsWith(".ts")) continue;
 
-		const eventName = fileName.slice(0, fileName.length - 3);
+		const event: Event = await import(`../events/${fileName}`);
 
-		events.set(eventName, await import(`../events/${fileName}`));
-		registerEvent(client, eventName);
+		events.set(event.name, event);
+		registerEvent(client, event.name);
 	}
 }
 
