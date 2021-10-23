@@ -1,7 +1,7 @@
-const { MessageEmbed } = require("discord.js");
+import { Client, CommandInteraction, Message, MessageEmbed } from "discord.js";
 
-exports.run = async (client, interaction) => {
-	function msToTime(ms) {
+export const run = async (client: Client, interaction: CommandInteraction): Promise<void> => {
+	function msToTime(ms: number) {
 		const days = Math.floor(ms / 86400000); // 24*60*60*1000
 		const daysms = ms % 86400000; // 24*60*60*1000
 		const hours = Math.floor(daysms / 3600000); // 60*60*1000
@@ -21,18 +21,18 @@ exports.run = async (client, interaction) => {
 
 	const ping = new MessageEmbed().setTitle("〽️ Ping!");
 
-	const message = await interaction.reply({ embeds: [ping], fetchReply: true });
+	const message = (await interaction.reply({ embeds: [ping], fetchReply: true })) as Message;
 
 	const pong = new MessageEmbed().setTitle("📶 Pong!").setTimestamp().setDescription(`
-	  **Response Time**: ${message.createdAt - interaction.createdAt} ms
+	  **Response Time**: ${message.createdAt.getMilliseconds() - interaction.createdAt.getMilliseconds()} ms
 	  **WebSocket Ping** ${Math.round(client.ws.ping)} ms
-	  **Uptime** ${msToTime(client.uptime)}
+	  **Uptime** ${msToTime(client.uptime as number)}
 	`);
 
 	await interaction.editReply({ embeds: [pong] });
 };
 
-exports.help = {
+export const help = {
 	name: "ping",
 	description: "Ping... Pong!",
 	options: [],
@@ -40,6 +40,6 @@ exports.help = {
 	level: "User",
 };
 
-exports.config = {
+export const config = {
 	enabled: true,
 };
