@@ -18,6 +18,7 @@
 		"newLine": "LF",
 		"allowUnreachableCode": false,
 		"outDir": "dist",
+		"sourceMap": true,
 		"allowJs": false
 	}
 }
