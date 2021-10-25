@@ -99,22 +99,18 @@ async function run(client: Client, interaction: CommandInteraction): Promise<voi
 		return;
 	}
 
-	const ytSong = interaction.options.getString("youtube");
-	const searchResult = await searchSong(interaction.options.getString("search"));
+	const ytSong = interaction.options.getString("youtube") || "";
+	const searchResult = (await searchSong(interaction.options.getString("search"))) || "";
 	const youtubeSong = ytSong || searchResult;
 
-	if (searchResult == null || !regexYT.test(searchResult)) {
-		await interaction.followUp({ content: "I couldn't find a song with that query, please try again." });
-		return;
-	}
-
-	if (youtubeSong == null) {
+	// We use && because || would trigger true even if we had a song.
+	if (searchResult == "" && ytSong == "") {
 		await interaction.followUp({ content: "Please provid a song or a search query.", ephemeral: true });
 		return;
 	}
 
-	if (!regexYT.test(youtubeSong)) {
-		await interaction.followUp({ content: "That's not a valid YouTube URL.", ephemeral: true });
+	if (!(regexYT.test(searchResult) || regexYT.test(ytSong))) {
+		await interaction.followUp({ content: "I couldn't find a song with that query, please try again." });
 		return;
 	}
 
@@ -142,6 +138,9 @@ async function run(client: Client, interaction: CommandInteraction): Promise<voi
 			// The channel was checked up above
 			channelId: (interaction.member as GuildMember).voice.channelId as string,
 			guildId: interaction.guild.id,
+			// There's some kind of issue with Discord.js and @discord.js/voice where we need this comment.
+			// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+			// @ts-ignore
 			adapterCreator: interaction.guild.voiceAdapterCreator,
 		});
 
