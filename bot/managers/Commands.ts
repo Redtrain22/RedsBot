@@ -47,7 +47,7 @@ export function destroy(): void {
 export async function reloadCommand(commandName: string): Promise<void> {
 	log(`Unloading Command ${commandName}`);
 	commands.delete(commandName);
-	delete require.cache[require.resolve(`../commands/${commandName}.js`)];
+	delete require.cache[require.resolve(`../commands/${commandName}`)];
 	log(`Loading Command ${commandName}`);
 
 	const command = await import(`../commands/${commandName}`);
