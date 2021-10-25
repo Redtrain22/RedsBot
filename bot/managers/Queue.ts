@@ -21,10 +21,11 @@ export function destroy(guildId: string): void {
  */
 export function addSong(guildId: string, song: AudioResource<PlayerMetadata>): void {
 	if (queue.get(guildId) == undefined) {
-		queue.set(guildId, [song]);
-	} else {
-		queue.get(guildId)?.concat(song);
+		queue.set(guildId, []);
 	}
+
+	// The array should already be defined from above.
+	queue.set(guildId, queue.get(guildId)?.concat(song) as AudioResource<PlayerMetadata>[]);
 }
 
 /**
