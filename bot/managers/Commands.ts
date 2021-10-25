@@ -138,8 +138,6 @@ function generateOverrides() {
 	const permissionOverides = new Collection<string, ApplicationCommandPermissionData[]>();
 
 	for (const [, command] of commands) {
-		// console.log(command.help.name);
-		// console.log(command.config.enabled);
 		if (!command.config.enabled) continue;
 		const commandName = command.help.name.toLowerCase();
 		if (command.help.level == "Dev") {
