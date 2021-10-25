@@ -53,17 +53,17 @@ export function play(interaction: CommandInteraction, connection: VoiceConnectio
 
 	// Base case for recursion.
 	if (
-		queueManager.getQueue(interaction.guild.id) == undefined ||
-		(queueManager.getQueue(interaction.guild.id)?.length == 0 && queueManager.getCurrentSong(interaction.guild.id) == undefined)
+		(queueManager.getQueue(interaction.guild.id) == undefined || queueManager.getQueue(interaction.guild.id)?.length == 0) &&
+		queueManager.getCurrentSong(interaction.guild.id) == undefined
 	) {
 		setTimeout(async function leave() {
 			// We test again to make sure there's no songs in queue or in the current song.
 			if (
 				// The guild should be in the interaction, since it was sent from a voic channel.
 				// Also it was checked above.
-				queueManager.getQueue((interaction.guild as Guild).id) == undefined ||
-				(queueManager.getQueue((interaction.guild as Guild).id)?.length == 0 &&
-					queueManager.getCurrentSong((interaction.guild as Guild).id) == undefined)
+				(queueManager.getQueue((interaction.guild as Guild).id) == undefined ||
+					queueManager.getQueue((interaction.guild as Guild).id)?.length == 0) &&
+				queueManager.getCurrentSong((interaction.guild as Guild).id) == undefined
 			) {
 				if (interaction.channel) {
 					await interaction.channel.send({ content: "Nothing in queue, leaving channel." });
