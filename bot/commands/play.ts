@@ -110,7 +110,7 @@ async function run(client: Client, interaction: CommandInteraction): Promise<voi
 	}
 
 	if (!(regexYT.test(searchResult) || regexYT.test(ytSong))) {
-		await interaction.followUp({ content: "I couldn't find a song with that query, please try again." });
+		await interaction.followUp({ content: "I couldn't find that song.", ephemeral: true });
 		return;
 	}
 
