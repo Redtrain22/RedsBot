@@ -138,9 +138,6 @@ async function run(client: Client, interaction: CommandInteraction): Promise<voi
 			// The channel was checked up above
 			channelId: (interaction.member as GuildMember).voice.channelId as string,
 			guildId: interaction.guild.id,
-			// There's some kind of issue with Discord.js and @discord.js/voice where we need this comment.
-			// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-			// @ts-ignore
 			adapterCreator: interaction.guild.voiceAdapterCreator,
 		});
 
