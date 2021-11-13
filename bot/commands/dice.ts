@@ -97,6 +97,7 @@ const help = {
 
 const config = {
 	enabled: true,
+	guildOnly: false,
 };
 
 export { run, help, config };

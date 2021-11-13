@@ -26,5 +26,6 @@ export interface Command extends CommandOptions {
 
 	config: {
 		enabled: boolean;
+		guildOnly: boolean;
 	};
 }

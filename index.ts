@@ -49,6 +49,10 @@ async function handleTerminal(input: string) {
 			await bot.registerSlashCommands();
 			break;
 
+		case "refreshSlashCommands":
+			await bot.refreshSlashCommands(args[0]);
+			break;
+
 		case "unregisterSlashCommands":
 			await bot.unregisterSlashCommands(args[0]);
 			break;
