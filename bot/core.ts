@@ -81,7 +81,7 @@ export async function refreshSlashCommands(scope: string): Promise<void> {
 
 export async function unregisterSlashCommands(args: string): Promise<void> {
 	// Check length because we might want to do global commands.
-	if (args.length == 0) {
+	if (args == undefined) {
 		await commandManager.unregisterSlashCommands(client);
 	} else {
 		await commandManager.unregisterSlashCommands(client, args);
