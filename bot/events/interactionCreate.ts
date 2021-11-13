@@ -9,11 +9,19 @@ const once = false;
 const name = "interactionCreate";
 
 const run = async (client: Client, interaction: Interaction): Promise<void> => {
+	let guildId = null;
+
+	if (interaction.guild == null) {
+		guildId = "0";
+	} else {
+		guildId = interaction.guild.id;
+	}
+
 	// Fetch or create our statistic
 	// The reason statistic is wrapped in [] is because findOrCreate actually outputs 2 variables and we only need the first.
 	const [statistic] = await Statistic.findOrCreate({
-		where: { guildId: interaction.guild?.id },
-		defaults: { guildId: interaction.guild?.id as string },
+		where: { guildId: guildId },
+		defaults: { guildId: guildId },
 	});
 
 	// Add one to our statistic
@@ -28,10 +36,17 @@ const run = async (client: Client, interaction: Interaction): Promise<void> => {
 			// Run the command.
 			await commands.get(interaction.commandName)?.run(client, interaction);
 
-			logger.log(
-				`"${interaction.member?.user.username}#${interaction.member?.user.discriminator}" ran command ${interaction.commandName} in guild "${interaction.guild?.name}" (${interaction.guild?.id})`,
-				"cmd"
-			);
+			if (guildId == "0") {
+				logger.log(
+					`"${interaction.member?.user.username}#${interaction.member?.user.discriminator}" ran command ${interaction.commandName} in DMs`,
+					"cmd"
+				);
+			} else {
+				logger.log(
+					`"${interaction.member?.user.username}#${interaction.member?.user.discriminator}" ran command ${interaction.commandName} in guild "${interaction.guild?.name}" (${interaction.guild?.id})`,
+					"cmd"
+				);
+			}
 		} catch (error) {
 			if (interaction.deferred || interaction.replied) {
 				await interaction.followUp({
