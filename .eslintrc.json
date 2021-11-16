@@ -46,6 +46,8 @@
 		"camelcase": ["error"],
 		"no-unsafe-optional-chaining": ["error"],
 		"@typescript-eslint/array-type": ["error"],
-		"@typescript-eslint/explicit-module-boundary-types": ["error"]
+		"@typescript-eslint/explicit-module-boundary-types": ["error"],
+		"no-redeclare": ["off"],
+		"@typescript-eslint/no-redeclare": ["error", { "ignoreDeclarationMerge": true }]
 	}
 }
