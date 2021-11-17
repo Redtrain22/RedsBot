@@ -175,7 +175,7 @@ export async function unregisterSlashCommands(client: Client, scope = "global"):
  */
 async function setPermissions(client: Client, scope = "global"): Promise<void> {
 	const { globalCommandIds, guildCommandIds } = await generateCommandIds(client);
-	const overrides = generatePermissions(client);
+	const overrides = generateOverrides(client);
 
 	if (scope == "global") {
 		for (const [guildId, guild] of client.guilds.cache) {
@@ -241,10 +241,10 @@ async function generateCommandIds(client: Client) {
 }
 
 /**
- * Generate permissions for commands.
- * @returns A collection full of permission objects for Discord under each command name.
+ * Generate permission overrides for commands.
+ * @returns A Collection of permissions in a key-value pair, the key being a guild ID and the value being command permission data.
  */
-function generatePermissions(client: Client): Collection<string, ApplicationCommandPermissionData[]> {
+function generateOverrides(client: Client): Collection<string, ApplicationCommandPermissionData[]> {
 	const permissions = new Collection<string, ApplicationCommandPermissionData[]>();
 
 	for (const [, command] of commands) {
