@@ -1,4 +1,3 @@
-// import { Statistic } from "../managers/Database";
 import { getCommands } from "../managers/Commands";
 const commands = getCommands();
 import * as logger from "../managers/Logger";
