@@ -258,36 +258,30 @@ function generateOverrides(client: Client): Collection<string, ApplicationComman
 
 			if (command.help.level == "Owner") {
 				config.ownerIds.forEach((ownerId) => {
-					if (permissions.get(guildId) == undefined) {
-						permissions.set(`${guildId}`, [{ id: ownerId, type: "USER", permission: true }]);
-					} else {
-						permissions.set(
-							`${guildId}`,
-							permissions.get(guildId)?.concat([{ id: ownerId, type: "USER", permission: true }]) as ApplicationCommandPermissionData[]
-						);
-					}
+					if (permissions.get(guildId) == undefined) permissions.set(`${guildId}`, []);
+
+					permissions.set(
+						`${guildId}`,
+						permissions.get(guildId)?.concat([{ id: ownerId, type: "USER", permission: true }]) as ApplicationCommandPermissionData[]
+					);
 				});
 			} else if (command.help.level == "Dev") {
 				config.devIds.forEach((devId) => {
-					if (permissions.get(guildId) == undefined) {
-						permissions.set(`${guildId}`, [{ id: devId, type: "USER", permission: true }]);
-					} else {
-						permissions.set(
-							`${guildId}`,
-							permissions.get(guildId)?.concat([{ id: devId, type: "USER", permission: true }]) as ApplicationCommandPermissionData[]
-						);
-					}
+					if (permissions.get(guildId) == undefined) permissions.set(`${guildId}`, []);
+
+					permissions.set(
+						`${guildId}`,
+						permissions.get(guildId)?.concat([{ id: devId, type: "USER", permission: true }]) as ApplicationCommandPermissionData[]
+					);
 				});
 			} else if (command.help.level == "Admin") {
 				config.adminIds.forEach((adminId) => {
-					if (permissions.get(guildId) == undefined) {
-						permissions.set(`${guildId}`, [{ id: adminId, type: "USER", permission: true }]);
-					} else {
-						permissions.set(
-							`${guildId}`,
-							permissions.get(guildId)?.concat([{ id: adminId, type: "USER", permission: true }]) as ApplicationCommandPermissionData[]
-						);
-					}
+					if (permissions.get(guildId) == undefined) permissions.set(`${guildId}`, []);
+
+					permissions.set(
+						`${guildId}`,
+						permissions.get(guildId)?.concat([{ id: adminId, type: "USER", permission: true }]) as ApplicationCommandPermissionData[]
+					);
 				});
 			}
 		});
