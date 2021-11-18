@@ -172,15 +172,13 @@ export async function unregisterSlashCommands(client: Client, scope = "global"):
  * Loop through each guild in the client.guilds.cache Manager and set guild permissions there.
  * @param client - A Discord.JS client.
  */
-async function setPermissions(client: Client, scope = "global"): Promise<void> {
+async function setPermissions(client: Client, scope = "global", overrides = generateOverrides(client)): Promise<void> {
 	const { globalCommandIds, guildCommandIds } = await generateCommandIds(client);
-	const overrides = generateOverrides(client);
 
 	if (scope == "global") {
-		for (const [guildId, guild] of client.guilds.cache) {
+		// The first element is the guildId, but we don't need that.
+		for (const [, guild] of client.guilds.cache) {
 			for (const [commandName, permissions] of overrides) {
-				const guild = client.guilds.cache.get(guildId);
-
 				// If the command doesn't exist as an ID we're going to ignore it.
 				if (globalCommandIds.get(commandName) == undefined) continue;
 
@@ -190,8 +188,6 @@ async function setPermissions(client: Client, scope = "global"): Promise<void> {
 			log(`Set slash command permissions in guild "${guild?.name}" (${guild?.id})`);
 		}
 	} else {
-		// const guild = await client.guilds.fetch(scope);
-
 		guildCommandIds.forEach(async (ids, guildId) => {
 			const guild = await client.guilds.fetch(guildId);
 
