@@ -71,10 +71,6 @@ export async function reloadCommands(): Promise<void> {
 	await commandManager.init();
 }
 
-export async function registerSlashCommands(scope: string): Promise<void> {
-	await commandManager.registerSlashCommands(client, scope);
-}
-
 export async function refreshSlashCommands(scope: string): Promise<void> {
 	await commandManager.refreshSlashCommands(client, scope);
 }

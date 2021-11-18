@@ -45,10 +45,6 @@ async function handleTerminal(input: string) {
 			await bot.reloadCommands();
 			break;
 
-		case "registerSlashCommands":
-			await bot.registerSlashCommands(args[0]);
-			break;
-
 		case "refreshSlashCommands":
 			await bot.refreshSlashCommands(args[0]);
 			break;

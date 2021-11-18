@@ -60,7 +60,7 @@ export async function reloadCommand(commandName: string): Promise<void> {
  * @param client - A Discord.JS client to register the slash commands to.
  * @param scope - "global", "guilds", or a guild's ID to register slash commands to.
  */
-export async function registerSlashCommands(client: Client, scope = "global"): Promise<void> {
+export async function refreshSlashCommands(client: Client, scope = "global"): Promise<void> {
 	const { globalCommands, guildCommands } = generateSlashCommands();
 
 	if (scope == "global") {
@@ -86,34 +86,6 @@ export async function registerSlashCommands(client: Client, scope = "global"): P
 		await guild.commands.set(guildCommands);
 		log(`Set Slash Commands in "${guild.name}" (${guild.id})`);
 		await setPermissions(client, guild.id);
-	}
-}
-
-/**
- * Refreshes slash commands on a more granular scale.
- * @param client - A Discord.JS client to register the slash commands to.
- * @param scope - The guildId of a guild to refesh commands on, or no guildId to do it globally.
- */
-export async function refreshSlashCommands(client: Client, scope = "global"): Promise<void> {
-	const { globalCommands, guildCommands } = generateSlashCommands();
-
-	if (scope == "global") {
-		await client.application?.fetch();
-		await client.application?.commands.set(globalCommands);
-		log("Set Slash Commands.");
-		await setPermissions(client);
-
-		client.guilds.cache.forEach(async (guild) => {
-			await guild.commands.set(guildCommands);
-			log(`Set Slash Commands in "${guild.name}" (${guild.id})`);
-			await setPermissions(client, guild.id);
-		});
-	} else {
-		const guild = await client.guilds.fetch(scope);
-		await guild.commands.set(guildCommands);
-
-		log(`Set Slash Commands in "${guild.name}" (${guild.id})`);
-		await setPermissions(client, scope);
 	}
 }
 
