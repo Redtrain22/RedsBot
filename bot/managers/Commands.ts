@@ -105,7 +105,6 @@ export async function refreshSlashCommands(client: Client, scope = "global"): Pr
 
 		client.guilds.cache.forEach(async (guild) => {
 			await guild.commands.set(guildCommands);
-			await setPermissions(client, guild.id); // Set individual guild permissions.
 			log(`Set Slash Commands in "${guild.name}" (${guild.id})`);
 			await setPermissions(client, guild.id);
 		});
