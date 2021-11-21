@@ -33,7 +33,14 @@ const run = async (client: Client, interaction: Interaction): Promise<void> => {
 			if (!commands.get(interaction.commandName)) return;
 
 			// Run the command.
-			await commands.get(interaction.commandName)?.run(client, interaction);
+			const cmd = commands.get(interaction.commandName);
+
+			if (!cmd?.config.enabled)
+				return await interaction.reply({
+					content: `Sorry but the ${interaction.commandName} command is currently disabled. It will be back sometime soon:tm:`,
+				});
+
+			await cmd.run(client, interaction);
 
 			if (guildId == "0") {
 				logger.log(
