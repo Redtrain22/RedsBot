@@ -10,6 +10,7 @@ type CommandOptions = {
 	};
 	config: {
 		enabled: boolean;
+		guildOnly: boolean;
 	};
 };
 
