@@ -49,7 +49,7 @@ export async function reloadCommand(commandName: string): Promise<void> {
 	delete require.cache[require.resolve(`../commands/${commandName}`)];
 	log(`Loading Command ${commandName}`);
 
-	const command = await import(`../commands/${commandName}`);
+	const command: Command = await import(`../commands/${commandName}`);
 
 	commands.set(commandName, command);
 	setAliases(command.help.name.toLowerCase());
