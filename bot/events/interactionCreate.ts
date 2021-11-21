@@ -35,14 +35,21 @@ const run = async (client: Client, interaction: Interaction): Promise<void> => {
 			// Run the command.
 			const cmd = commands.get(interaction.commandName);
 
-			if (!cmd?.config.enabled)
+			if (!cmd?.config.enabled) {
 				return await interaction.reply({
-					content: `Sorry but the ${interaction.commandName} command is currently disabled. It will be back sometime soon:tm:`,
+					content: `Sorry, but the ${interaction.commandName} command is currently disabled. It will be back sometime soon:tm:`,
 				});
+			}
+
+			if (cmd.config.guildOnly && !interaction.guild) {
+				return await interaction.reply({
+					content: `Sorry, but the ${interaction.commandName} command can only be run inside a guild. Please run this in a Discord server`,
+				});
+			}
 
 			await cmd.run(client, interaction);
 
-			if (guildId == "0") {
+			if (!interaction.guild) {
 				logger.log(
 					`"${interaction.member?.user.username}#${interaction.member?.user.discriminator}" ran command ${interaction.commandName} in DMs`,
 					"cmd"
