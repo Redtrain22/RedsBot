@@ -32,9 +32,9 @@ export async function init(): Promise<void> {
 export function destroy(): void {
 	log("Destroying Command Manager, commands won't work anymore.");
 
-	commands.forEach((command) => {
-		delete require.cache[require.resolve(`../commands/${command.help.name}`)];
-	});
+	// commands.forEach((command) => {
+	// 	delete require.cache[require.resolve(`../commands/${command.help.name}`)];
+	// });
 
 	commands.clear();
 }
@@ -46,7 +46,7 @@ export function destroy(): void {
 export async function reloadCommand(commandName: string): Promise<void> {
 	log(`Unloading Command ${commandName}`);
 	commands.delete(commandName);
-	delete require.cache[require.resolve(`../commands/${commandName}`)];
+	// delete require.cache[require.resolve(`../commands/${commandName}`)];
 	log(`Loading Command ${commandName}`);
 
 	const command: Command = await import(`../commands/${commandName}`);

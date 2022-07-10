@@ -71,5 +71,6 @@ export function unregisterEvent(client: Client, eventName: string): void {
 	client.removeAllListeners(eventName);
 	events.delete(eventName);
 	// Uncache the event so that it's not in memory anymore.
-	delete require.cache[require.resolve(`../events/${eventName}`)];
+	// This is unable to be done when using ESM since there's no API to unload the modules.
+	// delete require.cache[require.resolve(`../events/${eventName}`)];
 }
