@@ -1,7 +1,5 @@
 import { Client, Intents } from "discord.js";
 import * as configManager from "./managers/Config.js";
-configManager.init(); // Initialize our config so that other managers can access it if need be.
-
 import * as databaseManager from "./managers/Database.js";
 import * as commandManager from "./managers/Commands.js";
 import * as eventManager from "./managers/Events.js";

@@ -102,5 +102,7 @@ function checkFields(): void {
  * @returns The config of the bot.
  */
 export function getConfig(): Config {
+	if (userConfig == undefined) init();
+
 	return userConfig;
 }
