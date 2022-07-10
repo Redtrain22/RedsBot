@@ -22,9 +22,8 @@ const regexYT = new RegExp("(^(https?\\:\\/\\/)?(www\\.youtube\\.com|youtu\\.be)
 const ytSearcher = new YTSearcher(youtubeToken);
 
 const queryOptions = {
-	noCallHome: true,
 	youtubeSkipDashManifest: true,
-	o: "./bot/audioCache/%(title)s-%(id)s.%(ext)s",
+	output: "./bot/audioCache/%(title)s-%(id)s.%(ext)s",
 	getFilename: true,
 };
 
@@ -33,9 +32,8 @@ const downloadOptions = {
 	audioFormat: "opus",
 	recodeVideo: "ogg",
 	audioQuality: 0,
-	noCallHome: true,
 	youtubeSkipDashManifest: true,
-	o: "./bot/audioCache/%(title)s-%(id)s.%(ext)s",
+	output: "./bot/audioCache/%(title)s-%(id)s.%(ext)s",
 };
 
 /**
@@ -115,10 +113,11 @@ async function run(client: Client, interaction: CommandInteraction): Promise<voi
 	}
 
 	// Generate the filePath so that we know what we're working with.
-	const filePath = getFilePath((await youtube.raw(youtubeSong, queryOptions)).stdout);
+	// The default method returns the filepath due to our queryOptions telling it to return the file path.
+	const filePath = getFilePath((await youtube.default(youtubeSong, queryOptions)) as unknown as string);
 
 	// Check the audio cache for the song
-	if (!checkCache(filePath)) await youtube.raw(youtubeSong, downloadOptions);
+	if (!checkCache(filePath)) await youtube.default(youtubeSong, downloadOptions);
 
 	// Add the song as an AudioResource.
 	try {
