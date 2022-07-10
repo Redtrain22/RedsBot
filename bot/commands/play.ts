@@ -1,10 +1,10 @@
-import * as fs from "fs";
+import * as fs from "node:fs";
 import * as youtube from "youtube-dl-exec";
-import * as queueManager from "../managers/Queue";
-import * as playerManager from "../managers/Player";
-import * as logger from "../managers/Logger";
+import * as queueManager from "../managers/Queue.js";
+import * as playerManager from "../managers/Player.js";
+import * as logger from "../managers/Logger.js";
 import { YTSearcher } from "ytsearcher";
-import { getConfig } from "../managers/Config";
+import { getConfig } from "../managers/Config.js";
 const youtubeToken = getConfig().youtubeToken;
 import {
 	getVoiceConnection,
@@ -16,7 +16,7 @@ import {
 	VoiceConnection,
 } from "@discordjs/voice";
 import { Client, CommandInteraction, GuildMember } from "discord.js";
-import { PlayerMetadata } from "../types/PlayerMetadata";
+import { PlayerMetadata } from "../types/PlayerMetadata.js";
 
 const regexYT = new RegExp("(^(https?\\:\\/\\/)?(www\\.youtube\\.com|youtu\\.be)\\/(watch\\?v=.{11}|.{11})$)|(^.{11}$)");
 const ytSearcher = new YTSearcher(youtubeToken);

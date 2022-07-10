@@ -1,10 +1,10 @@
 import { Client, Intents } from "discord.js";
-import * as configManager from "./managers/Config";
+import * as configManager from "./managers/Config.js";
 configManager.init(); // Initialize our config so that other managers can access it if need be.
 
-import * as databaseManager from "./managers/Database";
-import * as commandManager from "./managers/Commands";
-import * as eventManager from "./managers/Events";
+import * as databaseManager from "./managers/Database.js";
+import * as commandManager from "./managers/Commands.js";
+import * as eventManager from "./managers/Events.js";
 
 // New instance of the discord client
 const intents = new Intents(["GUILDS", "GUILD_MESSAGES", "GUILD_BANS", "GUILD_VOICE_STATES", "DIRECT_MESSAGES"]); // Client Intents

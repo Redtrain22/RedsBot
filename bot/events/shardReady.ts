@@ -1,5 +1,5 @@
 import { Client } from "discord.js";
-import { log } from "../managers/Logger";
+import { log } from "../managers/Logger.js";
 
 const once = false;
 const name = "shardReady";

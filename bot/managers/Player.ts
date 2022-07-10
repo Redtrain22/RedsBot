@@ -1,6 +1,6 @@
 import { createAudioPlayer, NoSubscriberBehavior, AudioPlayerStatus, VoiceConnection, AudioPlayer, AudioResource } from "@discordjs/voice";
 import { Collection, CommandInteraction, Guild } from "discord.js";
-import * as queueManager from "./Queue";
+import * as queueManager from "./Queue.js";
 
 const audioPlayers = new Collection<string, AudioPlayer>();
 

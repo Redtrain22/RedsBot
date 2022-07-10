@@ -5,7 +5,7 @@ if (Number(process.version.slice(1).split(".")[0]) < 18 && Number(process.versio
 	throw new Error("Node 18.5.0 or newer is required. Please update Node on your system.");
 
 import { existsSync, mkdirSync } from "fs";
-import * as bot from "./bot/core";
+import * as bot from "./bot/core.js";
 import { createInterface } from "readline";
 
 const terminal = createInterface({

@@ -1,5 +1,5 @@
-import * as queueManager from "../managers/Queue";
-import * as playerManager from "../managers/Player";
+import * as queueManager from "../managers/Queue.js";
+import * as playerManager from "../managers/Player.js";
 import { Client, CommandInteraction } from "discord.js";
 
 async function run(client: Client, interaction: CommandInteraction): Promise<void> {

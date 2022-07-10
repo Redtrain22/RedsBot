@@ -1,7 +1,7 @@
-import { Config } from "../types/Config";
+import { Config } from "../types/Config.js";
 
 import { readFileSync, existsSync, writeFileSync, renameSync } from "fs";
-import { log, error } from "./Logger";
+import { log, error } from "./Logger.js";
 
 // Make our config.json template here.
 const configTemplate: Config = {

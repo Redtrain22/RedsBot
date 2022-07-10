@@ -1,8 +1,8 @@
-import { getCommands } from "../managers/Commands";
+import { getCommands } from "../managers/Commands.js";
 const commands = getCommands();
-import * as logger from "../managers/Logger";
+import * as logger from "../managers/Logger.js";
 import { Client, Interaction } from "discord.js";
-import { Statistic } from "../managers/Database";
+import { Statistic } from "../managers/Database.js";
 
 const once = false;
 const name = "interactionCreate";

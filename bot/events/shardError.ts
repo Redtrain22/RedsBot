@@ -1,5 +1,5 @@
 import { Client } from "discord.js";
-import * as logger from "../managers/Logger";
+import * as logger from "../managers/Logger.js";
 
 const once = false;
 const name = "shardError";

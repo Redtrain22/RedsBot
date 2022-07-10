@@ -1,5 +1,5 @@
 import { Client, CommandInteraction } from "discord.js";
-import * as playerManager from "../managers/Player";
+import * as playerManager from "../managers/Player.js";
 
 async function run(client: Client, interaction: CommandInteraction): Promise<void> {
 	const volume = interaction.options.getInteger("volume");

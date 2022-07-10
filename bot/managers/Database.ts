@@ -1,13 +1,13 @@
 import { Sequelize, DataTypes, Dialect } from "sequelize";
-import { getConfig } from "./Config";
+import { getConfig } from "./Config.js";
 const config = getConfig();
-import * as logger from "./Logger";
+import * as logger from "./Logger.js";
 
 // Delcare our sequelize object here.
 let sequelize = createDB();
 
 // Declare our models here.
-import { Statistic } from "../models/Statistic";
+import { Statistic } from "../models/Statistic.js";
 
 /**
  * Create the DB with options from the config.
@@ -113,4 +113,4 @@ function tableInit() {
 	);
 }
 
-export { Statistic } from "../models/Statistic";
+export { Statistic } from "../models/Statistic.js";

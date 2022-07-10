@@ -4,10 +4,10 @@
 	"include": ["bot/**/*", "./index.ts"],
 	"exclude": ["dist", "node_modules"],
 	"compilerOptions": {
-		"lib": ["es2020"],
-		"module": "commonjs",
-		"target": "es2020",
-		"moduleResolution": "node",
+		"lib": ["ES2022"],
+		"module": "NodeNext",
+		"target": "ES2022",
+		"moduleResolution": "NodeNext",
 		"strict": true,
 		"esModuleInterop": true,
 		"skipLibCheck": true,
@@ -18,7 +18,9 @@
 		"newLine": "LF",
 		"allowUnreachableCode": false,
 		"outDir": "dist",
-		"sourceMap": true,
-		"allowJs": false
+		"sourceMap": true
+	},
+	"ts-node": {
+		"esm": true
 	}
 }

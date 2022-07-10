@@ -1,6 +1,6 @@
 import { AudioResource } from "@discordjs/voice";
 import { Collection } from "discord.js";
-import { PlayerMetadata } from "../types/PlayerMetadata";
+import { PlayerMetadata } from "../types/PlayerMetadata.js";
 
 const queue = new Collection<string, AudioResource<PlayerMetadata>[]>();
 const currentSong = new Collection<string, AudioResource<PlayerMetadata> | undefined>();

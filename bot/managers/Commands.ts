@@ -1,9 +1,9 @@
-import { Command } from "../types/Command";
+import { Command } from "../types/Command.js";
 
 import { ApplicationCommandPermissionData, Client, Collection } from "discord.js";
 import fs from "fs";
-import { log } from "./Logger";
-import { getConfig } from "./Config";
+import { log } from "./Logger.js";
+import { getConfig } from "./Config.js";
 const config = getConfig();
 
 const commands = new Collection<string, Command>();

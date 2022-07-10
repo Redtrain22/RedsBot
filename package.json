@@ -2,7 +2,11 @@
 	"name": "redsbot",
 	"version": "2.0.0",
 	"description": "A personal bot being coded by me.",
-	"main": "dist/index.js",
+	"type": "module",
+	"exports": "./index.ts",
+	"engines": {
+		"node": ">=18.5.0"
+	},
 	"scripts": {
 		"start": "npx ts-node index.ts",
 		"test": "echo \"Error: no test specified\" && exit 1"

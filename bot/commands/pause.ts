@@ -1,6 +1,6 @@
 import { AudioPlayerStatus } from "@discordjs/voice";
 import { Client, CommandInteraction } from "discord.js";
-import { getPlayer } from "../managers/Player";
+import { getPlayer } from "../managers/Player.js";
 
 const run = async (client: Client, interaction: CommandInteraction): Promise<void> => {
 	if (interaction.guild == null) return await interaction.reply({ content: "Please run this command in a guild.", ephemeral: true });

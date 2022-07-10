@@ -1,5 +1,5 @@
 import { MessageEmbed, Client, CommandInteraction } from "discord.js";
-import * as queueManager from "../managers/Queue";
+import * as queueManager from "../managers/Queue.js";
 
 async function run(client: Client, interaction: CommandInteraction): Promise<void> {
 	if (interaction.guild == null) return await interaction.reply({ content: "Please run this command from a guild." });
