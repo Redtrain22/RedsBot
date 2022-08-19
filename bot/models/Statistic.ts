@@ -1,20 +1,13 @@
-import { Model, Optional } from "sequelize";
+import { Model, InferAttributes, InferCreationAttributes, NonAttribute, CreationOptional } from "sequelize";
 
-interface StatisticAttributes {
-	guildId: string;
-	interactionCount: BigInt;
-}
+export class Statistic extends Model<InferAttributes<Statistic>, InferCreationAttributes<Statistic>> {
+	declare guildId: string;
+	declare interactionCount: bigint;
 
-type StatisticCreationAttributes = Optional<StatisticAttributes, "interactionCount">;
+	declare createdAt: CreationOptional<Date>;
+	declare updatedAt: CreationOptional<Date>;
 
-export class Statistic extends Model<StatisticAttributes, StatisticCreationAttributes> implements StatisticAttributes {
-	public guildId!: string;
-	public interactionCount: BigInt = 0n;
-
-	public readonly createdAt!: Date;
-	public readonly updatedAt!: Date;
-
-	add(number = 1): void {
+	add(number = 1): NonAttribute<void> {
 		this.increment("interactionCount", { by: number });
 	}
 }

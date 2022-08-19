@@ -4,7 +4,7 @@ const config = getConfig();
 import * as logger from "./Logger.js";
 
 // Delcare our sequelize object here.
-let sequelize = createDB();
+let sequelize: Sequelize;
 
 // Declare our models here.
 import { Statistic } from "../models/Statistic.js";
@@ -101,13 +101,15 @@ function tableInit() {
 	Statistic.init(
 		{
 			guildId: {
-				type: DataTypes.BIGINT,
+				type: DataTypes.STRING,
 				allowNull: false,
 			},
 			interactionCount: {
 				type: DataTypes.BIGINT,
 				defaultValue: 0,
 			},
+			createdAt: DataTypes.DATE,
+			updatedAt: DataTypes.DATE,
 		},
 		{ sequelize: sequelize, modelName: "Statistic" }
 	);
