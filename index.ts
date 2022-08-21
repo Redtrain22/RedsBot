@@ -1,6 +1,8 @@
 // This will check if the node version you are running is the required
 // Node version, if it isn't it will throw the following error to inform you.
-// Discord.js (v13.1.0) requires a minimum version of Node.JS v16.6.0 to work
+// Discord.js (v14.2.0) requires a minimum version of Node.JS v16.6.0 to work
+// Node 18 is marked as the minimum requirement because that's what this was written using.
+// With the changes that Node 18 brings not having to deal with backwards compatibility is nice.
 if (Number(process.version.slice(1).split(".")[0]) < 18 && Number(process.version.slice(1).split(".")[1]) < 5)
 	throw new Error("Node 18.5.0 or newer is required. Please update Node on your system.");
 
