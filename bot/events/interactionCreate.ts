@@ -20,7 +20,7 @@ const run = async (client: Client, interaction: Interaction): Promise<void> => {
 	// The reason statistic is wrapped in [] is because findOrCreate actually outputs 2 variables and we only need the first.
 	const [statistic] = await Statistic.findOrCreate({
 		where: { guildId: guildId },
-		defaults: { guildId: guildId },
+		defaults: { guildId: guildId, interactionCount: 0n },
 	});
 
 	// Add one to our statistic
@@ -36,15 +36,17 @@ const run = async (client: Client, interaction: Interaction): Promise<void> => {
 			const cmd = commands.get(interaction.commandName);
 
 			if (!cmd?.config.enabled) {
-				return await interaction.reply({
+				await interaction.reply({
 					content: `Sorry, but the ${interaction.commandName} command is currently disabled. It will be back sometime soon:tm:`,
 				});
+				return;
 			}
 
 			if (cmd.config.guildOnly && !interaction.guild) {
-				return await interaction.reply({
+				await interaction.reply({
 					content: `Sorry, but the ${interaction.commandName} command can only be run inside a guild. Please run this in a Discord server`,
 				});
+				return;
 			}
 
 			await cmd.run(client, interaction);
