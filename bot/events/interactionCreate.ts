@@ -1,7 +1,7 @@
 import { getCommands } from "../managers/Commands.js";
 const commands = getCommands();
 import * as logger from "../managers/Logger.js";
-import { Client, Interaction } from "discord.js";
+import { Client, Interaction, InteractionType } from "discord.js";
 import { Statistic } from "../managers/Database.js";
 
 const once = false;
@@ -27,7 +27,7 @@ const run = async (client: Client, interaction: Interaction): Promise<void> => {
 	statistic.add();
 
 	// Check if the interaction is a command or not.
-	if (interaction.isCommand()) {
+	if (interaction.type == InteractionType.ApplicationCommand) {
 		try {
 			// Return if it's not a command.
 			if (!commands.get(interaction.commandName)) return;
