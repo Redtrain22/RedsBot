@@ -1,10 +1,10 @@
-import { ApplicationCommandOptionData, Client, CommandInteraction } from "discord.js";
+import { Client, CommandInteraction, SlashCommandBuilder } from "discord.js";
 
 type CommandOptions = {
 	help: {
 		name: string;
 		description: string;
-		options: ApplicationCommandOptionData[];
+		options: SlashCommandBuilder;
 		aliases: string[];
 		level: string;
 	};
@@ -20,7 +20,7 @@ export interface Command extends CommandOptions {
 	help: {
 		name: string;
 		description: string;
-		options: ApplicationCommandOptionData[];
+		options: SlashCommandBuilder;
 		aliases: string[];
 		level: string;
 	};
