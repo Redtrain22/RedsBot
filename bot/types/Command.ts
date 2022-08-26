@@ -1,32 +1,14 @@
-import { Client, CommandInteraction, SlashCommandBuilder } from "discord.js";
+import { Client, CommandInteraction, PermissionFlagsBits, SlashCommandBuilder } from "discord.js";
 
-type CommandOptions = {
-	help: {
-		name: string;
-		description: string;
-		options: SlashCommandBuilder;
-		aliases: string[];
-		level: string;
-	};
-	config: {
-		enabled: boolean;
-		guildOnly: boolean;
-	};
-};
-
-export interface Command extends CommandOptions {
+export interface Command {
 	run: (client: Client, interaction: CommandInteraction) => Promise<void>;
 
-	help: {
-		name: string;
-		description: string;
-		options: SlashCommandBuilder;
-		aliases: string[];
-		level: string;
-	};
-
 	config: {
+		name: string;
 		enabled: boolean;
 		guildOnly: boolean;
+		description: string;
+		defaultPermission: typeof PermissionFlagsBits;
+		options: SlashCommandBuilder;
 	};
 }
