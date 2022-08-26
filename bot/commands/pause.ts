@@ -1,34 +1,42 @@
 import { AudioPlayerStatus } from "@discordjs/voice";
-import { Client, CommandInteraction } from "discord.js";
+import { ChatInputCommandInteraction, Client, PermissionFlagsBits, SlashCommandBuilder } from "discord.js";
 import { getPlayer } from "../managers/Player.js";
 
-const run = async (client: Client, interaction: CommandInteraction): Promise<void> => {
-	if (interaction.guild == null) return await interaction.reply({ content: "Please run this command in a guild.", ephemeral: true });
-
+const run = async (client: Client, interaction: ChatInputCommandInteraction): Promise<void> => {
+	if (interaction.guild == null) {
+		await interaction.reply({ content: "Please run this command in a guild.", ephemeral: true });
+		return;
+	}
 	if (getPlayer(interaction.guild?.id)?.state.status == AudioPlayerStatus.Paused) {
 		getPlayer(interaction.guild?.id)?.unpause();
 	} else {
 		getPlayer(interaction.guild?.id)?.pause(true);
 	}
 
-	return await interaction.reply({
+	await interaction.reply({
 		content: `${
 			getPlayer(interaction.guild?.id)?.state.status == AudioPlayerStatus.Paused ? "Paused" : "Unpaused"
 		} the player, please run pause again to unpause it.`,
 	});
 };
 
-const help = {
-	name: "pause",
-	description: "(Un)Pause the play command.",
-	options: [],
-	aliases: [""],
-	level: "User",
-};
+const name = "pause";
+const enabled = true;
+const guildOnly = true;
+const description = "(Un)Pause the play command.";
+const defaultPermission = PermissionFlagsBits.UseApplicationCommands;
+const options = new SlashCommandBuilder()
+	.setName("ping")
+	.setDescription("Ping... Pong!")
+	.setDefaultMemberPermissions(PermissionFlagsBits.UseApplicationCommands);
 
 const config = {
-	enabled: true,
-	guildOnly: true,
+	name,
+	enabled,
+	guildOnly,
+	description,
+	defaultPermission,
+	options,
 };
 
-export { run, help, config };
+export { run, config };
