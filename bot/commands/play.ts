@@ -15,7 +15,7 @@ import {
 	entersState,
 	VoiceConnection,
 } from "@discordjs/voice";
-import { Client, CommandInteraction, GuildMember } from "discord.js";
+import { ChannelType, ChatInputCommandInteraction, Client, GuildMember, PermissionFlagsBits, SlashCommandBuilder } from "discord.js";
 import { PlayerMetadata } from "../types/PlayerMetadata.js";
 
 const regexYT = new RegExp("(^(https?\\:\\/\\/)?(www\\.youtube\\.com|youtu\\.be)\\/(watch\\?v=.{11}|.{11})$)|(^.{11}$)");
@@ -83,7 +83,7 @@ async function searchSong(query: string | null): Promise<string | null> {
 	return results.currentPage?.first()?.url as string;
 }
 
-async function run(client: Client, interaction: CommandInteraction): Promise<void> {
+async function run(client: Client, interaction: ChatInputCommandInteraction): Promise<void> {
 	await interaction.deferReply();
 
 	if (interaction.guild == null) {
@@ -92,7 +92,7 @@ async function run(client: Client, interaction: CommandInteraction): Promise<voi
 	}
 
 	// If the user isn't in voice, tell them to join.
-	if (!((interaction.member as GuildMember).voice.channel?.type == "GUILD_VOICE")) {
+	if (!((interaction.member as GuildMember).voice.channel?.type == ChannelType.GuildVoice)) {
 		await interaction.followUp({ content: "Please join a voice channel to use this command", ephemeral: true });
 		return;
 	}
@@ -180,30 +180,24 @@ async function run(client: Client, interaction: CommandInteraction): Promise<voi
 	}
 }
 
-const help = {
-	name: "play",
-	description: "Play a song in the bot.",
-	options: [
-		{
-			type: "STRING",
-			name: "youtube",
-			description: "A YouTube URL",
-			required: false,
-		},
-		{
-			type: "STRING",
-			name: "search",
-			description: "What you want to search youtube for.",
-			required: false,
-		},
-	],
-	aliases: [""],
-	level: "User",
-};
+const name = "play";
+const enabled = true;
+const guildOnly = true;
+const description = "Play a song in the bot.";
+const defaultPermission = PermissionFlagsBits.UseApplicationCommands;
+const options = new SlashCommandBuilder()
+	.setName(name)
+	.setDescription(description)
+	.addStringOption((option) => option.setName("query").setDescription("Youtube, SoundCloud, or Spotify link").setRequired(true))
+	.setDefaultMemberPermissions(defaultPermission);
 
 const config = {
-	enabled: true,
-	guildOnly: true,
+	name,
+	enabled,
+	description,
+	guildOnly,
+	options,
+	defaultPermission,
 };
 
-export { run, help, config };
+export { run, config };
