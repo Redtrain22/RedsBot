@@ -1,37 +1,43 @@
-import { Client, CommandInteraction } from "discord.js";
+import { Client, ChatInputCommandInteraction, PermissionFlagsBits, SlashCommandBuilder } from "discord.js";
 import * as playerManager from "../managers/Player.js";
 
-async function run(client: Client, interaction: CommandInteraction): Promise<void> {
+async function run(client: Client, interaction: ChatInputCommandInteraction): Promise<void> {
 	const volume = interaction.options.getInteger("volume");
 
-	if (interaction.guild == null) return await interaction.reply({ content: "Please run this command from a guild." });
+	if (interaction.guild == null) {
+		await interaction.reply({ content: "Please run this command from a guild." });
+		return;
+	}
 
 	if (volume) {
 		playerManager.setVolume(interaction.guild.id, volume);
-		return await interaction.reply({ content: `Set volume to ${volume}` });
+		await interaction.reply({ content: `Set volume to ${volume}` });
+		return;
 	} else {
-		return await interaction.reply({ content: `Current Volume: ${playerManager.getVolume(interaction.guild.id) || 0.5 * 100}` });
+		await interaction.reply({ content: `Current Volume: ${playerManager.getVolume(interaction.guild.id) || 0.5 * 100}` });
+		return;
 	}
 }
 
-const help = {
-	name: "volume",
-	description: "Shows or edits the current volume.",
-	options: [
-		{
-			type: "INTEGER",
-			name: "volume",
-			description: "The volume number.",
-			required: false,
-		},
-	],
-	aliases: [""],
-	level: "User",
-};
+const name = "volume";
+const enabled = true;
+const guildOnly = true;
+const description = "Shows or edits the current volume.";
+const defaultPermission = PermissionFlagsBits.UseApplicationCommands;
+const options = new SlashCommandBuilder()
+	.setName(name)
+	.setDescription(description)
+	.addIntegerOption((option) => option.setName("volume").setDescription("The volume expressed as a percentage").setRequired(false))
+	.setDMPermission(!guildOnly)
+	.setDefaultMemberPermissions(defaultPermission);
 
 const config = {
-	enabled: true,
-	guildOnly: true,
+	name,
+	enabled,
+	guildOnly,
+	description,
+	defaultPermission,
+	options,
 };
 
-export { run, help, config };
+export { run, config };
