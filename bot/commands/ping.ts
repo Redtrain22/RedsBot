@@ -24,7 +24,7 @@ async function run(client: Client, interaction: ChatInputCommandInteraction): Pr
 	const message = (await interaction.reply({ embeds: [ping], fetchReply: true })) as Message;
 
 	const pong = new EmbedBuilder().setTitle("📶 Pong!").setTimestamp().setDescription(`
-	  **Response Time**: ${message.createdAt.getMilliseconds() - interaction.createdAt.getMilliseconds()} ms
+	  **Response Time (Round Trip)**: ${message.createdTimestamp - interaction.createdTimestamp} ms
 	  **WebSocket Ping** ${Math.round(client.ws.ping)} ms
 	  **Uptime** ${msToTime(client.uptime as number)}
 	`);
