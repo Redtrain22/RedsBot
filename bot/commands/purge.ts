@@ -1,10 +1,9 @@
-import { Client, Collection, CommandInteraction, Message, TextChannel } from "discord.js";
+import { ChatInputCommandInteraction, Client, Collection, Message, PermissionFlagsBits, SlashCommandBuilder, TextChannel } from "discord.js";
 
-async function run(client: Client, interaction: CommandInteraction): Promise<void> {
+async function run(client: Client, interaction: ChatInputCommandInteraction): Promise<void> {
 	await interaction.deferReply();
 	const numMessges = interaction.options.getInteger("amount", true) + 1;
-
-	const messages = await interaction.channel?.messages.fetch({ limit: numMessges }, { cache: true });
+	const messages = await interaction.channel?.messages.fetch({ limit: numMessges, cache: true });
 
 	if (messages == undefined) {
 		await interaction.followUp({ content: "Unable to fetch messages." });
@@ -40,24 +39,25 @@ async function run(client: Client, interaction: CommandInteraction): Promise<voi
 	return;
 }
 
-const help = {
-	name: "purge",
-	description: "Purge X number of messages from the channel",
-	options: [
-		{
-			type: "INTEGER",
-			name: "amount",
-			description: "Number of messages to purge",
-			required: true,
-		},
-	],
-	aliases: [""],
-	level: "GuildAdmin",
-};
+const name = "purge";
+const enabled = true;
+const guildOnly = true;
+const description = "Purge X number of messages from the channel";
+const defaultPermission = PermissionFlagsBits.KickMembers | PermissionFlagsBits.BanMembers;
+const options = new SlashCommandBuilder()
+	.setName(name)
+	.setDescription(description)
+	.addIntegerOption((option) => option.setName("amount").setDescription("Number of messages to purge").setRequired(true))
+	.setDMPermission(!guildOnly)
+	.setDefaultMemberPermissions(defaultPermission);
 
 const config = {
-	guildOnly: true,
-	enabled: true,
+	name,
+	enabled,
+	guildOnly,
+	description,
+	defaultPermission,
+	options,
 };
 
-export { run, help, config };
+export { run, config };
