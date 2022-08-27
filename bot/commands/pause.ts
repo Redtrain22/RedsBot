@@ -25,10 +25,7 @@ const enabled = true;
 const guildOnly = true;
 const description = "(Un)Pause the play command.";
 const defaultPermission = PermissionFlagsBits.UseApplicationCommands;
-const options = new SlashCommandBuilder()
-	.setName("ping")
-	.setDescription("Ping... Pong!")
-	.setDefaultMemberPermissions(PermissionFlagsBits.UseApplicationCommands);
+const options = new SlashCommandBuilder().setName(name).setDescription(description).setDefaultMemberPermissions(defaultPermission);
 
 const config = {
 	name,
