@@ -57,7 +57,7 @@ export async function reloadCommand(commandName: string): Promise<void> {
  * @param client - A Discord.JS client to register the slash commands to.
  * @param scope - "global", "guilds", or a guild's ID to register slash commands to.
  */
-export async function refreshSlashCommands(client: Client, scope = "global"): Promise<void> {
+export async function registerSlashCommands(client: Client, scope = "global"): Promise<void> {
 	const { globalCommands, guildCommands } = generateSlashCommands();
 
 	if (scope == "global") {
