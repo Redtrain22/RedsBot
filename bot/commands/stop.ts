@@ -1,8 +1,8 @@
-import { Client, CommandInteraction } from "discord.js";
+import { Client, ChatInputCommandInteraction, PermissionFlagsBits, SlashCommandBuilder } from "discord.js";
 import * as playerManager from "../managers/Player.js";
 import * as queueManager from "../managers/Queue.js";
 
-async function run(client: Client, interaction: CommandInteraction): Promise<void> {
+async function run(client: Client, interaction: ChatInputCommandInteraction): Promise<void> {
 	if (interaction.guild == null) {
 		await interaction.reply({ content: "Please run this command inside a guild." });
 		return;
@@ -13,17 +13,24 @@ async function run(client: Client, interaction: CommandInteraction): Promise<voi
 	await interaction.reply({ content: "Left the channel and cleared the queue." });
 }
 
-const help = {
-	name: "stop",
-	description: "Stops the bot from playing music and clears the queue.",
-	options: [],
-	aliases: [""],
-	level: "User",
-};
+const name = "stop";
+const enabled = true;
+const guildOnly = true;
+const description = "Stops the bot from playing music AND clears the queue.";
+const defaultPermission = PermissionFlagsBits.UseApplicationCommands;
+const options = new SlashCommandBuilder()
+	.setName(name)
+	.setDescription(description)
+	.setDMPermission(!guildOnly)
+	.setDefaultMemberPermissions(defaultPermission);
 
 const config = {
-	enabled: true,
-	guildOnly: true,
+	name,
+	enabled,
+	guildOnly,
+	description,
+	defaultPermission,
+	options,
 };
 
-export { run, help, config };
+export { run, config };
