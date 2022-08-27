@@ -42,7 +42,7 @@ const downloadOptions = {
  * @returns The file path that it will be after transcoding it to ogg.
  */
 function getFilePath(filePath: string): string {
-	const oggFilePath = filePath.substr(0, filePath.lastIndexOf(".")).concat(".ogg");
+	const oggFilePath = filePath.substring(0, filePath.lastIndexOf(".")).concat(".ogg");
 
 	return oggFilePath;
 }
@@ -53,13 +53,16 @@ function getFilePath(filePath: string): string {
  * @returns True or False based on whether it exists or not.
  */
 function checkCache(filePath: string): boolean {
-	const ytId = filePath.substr(filePath.length - 15, 11);
+	const VIDEO_ID_LENGTH = 11;
+	const VIDEO_ID_AND_FILE_EXT_LENGTH = 15;
+
+	const ytId = filePath.substring(filePath.length - VIDEO_ID_AND_FILE_EXT_LENGTH, VIDEO_ID_LENGTH);
 	const audioFiles = fs.readdirSync("./bot/audioCache");
 
 	// The only thing worrying about this is that it's a N time.
 	// No idea how this would perform in say a 10000 item array.
 	for (const audioFile of audioFiles) {
-		const fileId = audioFile.substr(audioFile.length - 15, 11);
+		const fileId = audioFile.substring(audioFile.length - VIDEO_ID_AND_FILE_EXT_LENGTH, VIDEO_ID_LENGTH);
 
 		if (fileId == ytId) return true;
 	}
@@ -72,15 +75,15 @@ function checkCache(filePath: string): boolean {
  * @param query - The query to search youtube with.
  * @returns A youtube URL or null
  */
-async function searchSong(query: string | null): Promise<string | null> {
-	if (query == null) return null;
+async function searchSong(query: string): Promise<string | undefined> {
+	if (query == null) return undefined;
 	const results = await ytSearcher.search(query, { type: "video" });
 
-	if (results.currentPage?.first() == null) return null;
+	if (results.currentPage?.first() == null) return undefined;
 
-	if (results.currentPage?.first()?.url == undefined) return null;
+	if (results.currentPage?.first()?.url == undefined) return undefined;
 
-	return results.currentPage?.first()?.url as string;
+	return results.currentPage?.first()?.url;
 }
 
 async function run(client: Client, interaction: ChatInputCommandInteraction): Promise<void> {
@@ -97,17 +100,15 @@ async function run(client: Client, interaction: ChatInputCommandInteraction): Pr
 		return;
 	}
 
-	const ytSong = interaction.options.getString("youtube") || "";
-	const searchResult = (await searchSong(interaction.options.getString("search"))) || "";
-	const youtubeSong = ytSong || searchResult;
+	const ytSong = interaction.options.getString("query", true);
+	const youtubeSong = await searchSong(ytSong);
 
-	// We use && because || would trigger true even if we had a song.
-	if (searchResult == "" && ytSong == "") {
+	if (youtubeSong == undefined) {
 		await interaction.followUp({ content: "Please provid a song or a search query.", ephemeral: true });
 		return;
 	}
 
-	if (!(regexYT.test(searchResult) || regexYT.test(ytSong))) {
+	if (!regexYT.test(youtubeSong)) {
 		await interaction.followUp({ content: "I couldn't find that song.", ephemeral: true });
 		return;
 	}
@@ -117,7 +118,7 @@ async function run(client: Client, interaction: ChatInputCommandInteraction): Pr
 	const filePath = getFilePath((await youtube.default(youtubeSong, queryOptions)) as unknown as string);
 
 	// Check the audio cache for the song
-	if (!checkCache(filePath)) await youtube.default(youtubeSong, downloadOptions);
+	if (!checkCache(filePath)) await youtube.default(ytSong, downloadOptions);
 
 	// Add the song as an AudioResource.
 	try {
@@ -188,7 +189,8 @@ const defaultPermission = PermissionFlagsBits.UseApplicationCommands;
 const options = new SlashCommandBuilder()
 	.setName(name)
 	.setDescription(description)
-	.addStringOption((option) => option.setName("query").setDescription("Youtube, SoundCloud, or Spotify link").setRequired(true))
+	.addStringOption((option) => option.setName("query").setDescription("Youtube link, or something to search Youtube for.").setRequired(true))
+	.setDMPermission(!guildOnly)
 	.setDefaultMemberPermissions(defaultPermission);
 
 const config = {
