@@ -157,7 +157,7 @@ async function setPermissions(client: Client, scope = "global", overrides = gene
 					token: config.discordToken,
 				});
 			}
-			log(`Set slash command permissions in guild "${guild?.name}" (${guild?.id})`);
+			log(`Set slash Command Permissions in guild "${guild?.name}" (${guild?.id})`);
 		}
 	} else {
 		const guild = await client.guilds.fetch(scope);
@@ -174,7 +174,7 @@ async function setPermissions(client: Client, scope = "global", overrides = gene
 				token: config.discordToken,
 			});
 		});
-		log(`Set slash command permissions in guild "${guild?.name}" (${guild?.id})`);
+		log(`Set Slash Command Permissions in guild "${guild?.name}" (${guild?.id})`);
 	}
 }
 
