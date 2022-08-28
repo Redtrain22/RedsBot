@@ -6,15 +6,7 @@ import * as logger from "../managers/Logger.js";
 import { YTSearcher } from "ytsearcher";
 import { getConfig } from "../managers/Config.js";
 const youtubeToken = getConfig().youtubeToken;
-import {
-	getVoiceConnection,
-	joinVoiceChannel,
-	VoiceConnectionStatus,
-	createAudioResource,
-	StreamType,
-	entersState,
-	VoiceConnection,
-} from "@discordjs/voice";
+import { getVoiceConnection, joinVoiceChannel, VoiceConnectionStatus, createAudioResource, StreamType, entersState } from "@discordjs/voice";
 import { ChannelType, ChatInputCommandInteraction, Client, GuildMember, PermissionFlagsBits, SlashCommandBuilder } from "discord.js";
 import { PlayerMetadata } from "../types/PlayerMetadata.js";
 
@@ -134,20 +126,20 @@ async function run(client: Client, interaction: ChatInputCommandInteraction): Pr
 	}
 
 	if (getVoiceConnection(interaction.guild.id) == undefined) {
-		joinVoiceChannel({
-			// The channel was checked up above
-			channelId: (interaction.member as GuildMember).voice.channelId as string,
-			guildId: interaction.guild.id,
-			adapterCreator: interaction.guild.voiceAdapterCreator,
-		});
-
 		await interaction.followUp({ content: `Joining the channel and playing ${youtubeSong}` });
 	} else {
 		await interaction.followUp({ content: `Adding ${youtubeSong} to queue` });
 	}
 
 	// Initialize our connection.
-	const connection = getVoiceConnection(interaction.guild.id) as VoiceConnection; // Voice Connection should be valid from the if statement above.
+	const connection =
+		getVoiceConnection(interaction.guild.id) ||
+		joinVoiceChannel({
+			// The channel was checked up above
+			channelId: (interaction.member as GuildMember).voice.channelId as string,
+			guildId: interaction.guild.id,
+			adapterCreator: interaction.guild.voiceAdapterCreator,
+		});
 
 	// Test if the listener count is greater than zero so that we don't register it N number of times.
 	// N being however many times the command was ran.
