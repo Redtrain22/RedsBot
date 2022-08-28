@@ -110,7 +110,7 @@ async function run(client: Client, interaction: ChatInputCommandInteraction): Pr
 	const filePath = getFilePath((await youtube.default(youtubeSong, queryOptions)) as unknown as string);
 
 	// Check the audio cache for the song
-	if (!checkCache(filePath)) await youtube.default(ytSong, downloadOptions);
+	if (!checkCache(filePath)) await youtube.default(youtubeSong, downloadOptions);
 
 	// Add the song as an AudioResource.
 	try {
