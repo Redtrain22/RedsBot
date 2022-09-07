@@ -59,7 +59,7 @@ const defaultPermission = PermissionFlagsBits.UseApplicationCommands;
 const options = new SlashCommandBuilder()
 	.setName(name)
 	.setDescription(description)
-	.addStringOption((option) => option.setName("page").setDescription("A page number to browse.").setRequired(false))
+	.addIntegerOption((option) => option.setName("page").setDescription("A page number to browse.").setRequired(false))
 	.setDMPermission(!guildOnly)
 	.setDefaultMemberPermissions(defaultPermission);
 
