@@ -1,5 +1,5 @@
 import { Client, Collection } from "discord.js";
-import * as fs from "fs";
+import * as fs from "node:fs";
 import { log } from "../managers/Logger.js";
 import { Event } from "../types/Event.js";
 

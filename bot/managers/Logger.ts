@@ -3,9 +3,9 @@
 // Building a custom console class in order to colour our console correctly.
 import chalk from "chalk";
 import moment from "moment";
-import fs from "fs";
-import util from "util";
-import path from "path";
+import fs from "node:fs";
+import util from "node:util";
+import path from "node:path";
 
 function getPath(date: string): string {
 	return path.resolve(`./logs/${date}.log`);
