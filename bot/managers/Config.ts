@@ -1,6 +1,6 @@
 import { Config } from "../types/Config.js";
 
-import { readFileSync, existsSync, writeFileSync, renameSync } from "fs";
+import { readFileSync, existsSync, writeFileSync, renameSync } from "node:fs";
 import { log, error } from "./Logger.js";
 
 // Make our config.json template here.
@@ -80,15 +80,28 @@ function appendConfig(): void {
  * Check the fields of the config.
  */
 function checkFields(): void {
+	let isSqliteDB = false;
+
 	for (const configField of Object.keys(configTemplate)) {
 		// We don't need to test these fields in here.
 		// Version should now be the new "default value".
 		if (configField == "version") continue;
-		if (configField == "databaseType") continue;
+		// if (configField == "databaseType") continue;
+		if (configField == "databaseType") {
+			if (userConfig[configField].toLowerCase() == "sqlite") isSqliteDB = true;
+			continue;
+		}
+
 		if (configField == "databaseLogging") continue;
 		// devIds and adminIds are able to be blank fields.
 		if (configField == "devIds") continue;
 		if (configField == "adminIds") continue;
+
+		// Skip fields not required for SQLite
+		if (isSqliteDB) {
+			const skipFields = ["databaseUser", "databasePassword", "databaseHost", "databasePort", "databaseName"];
+			if (skipFields.includes(configField)) continue;
+		}
 
 		// Check if config[configField] is there AND if the field is the default value.
 		if (userConfig[configField as keyof Config] && userConfig[configField as keyof Config] == configTemplate[configField as keyof Config]) {
