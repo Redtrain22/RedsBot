@@ -6,16 +6,8 @@ import * as logger from "../managers/Logger.js";
 import { YTSearcher } from "ytsearcher";
 import { getConfig } from "../managers/Config.js";
 const youtubeToken = getConfig().youtubeToken;
-import {
-	getVoiceConnection,
-	joinVoiceChannel,
-	VoiceConnectionStatus,
-	createAudioResource,
-	StreamType,
-	entersState,
-	VoiceConnection,
-} from "@discordjs/voice";
-import { Client, CommandInteraction, GuildMember } from "discord.js";
+import { getVoiceConnection, joinVoiceChannel, VoiceConnectionStatus, createAudioResource, StreamType, entersState } from "@discordjs/voice";
+import { ChannelType, ChatInputCommandInteraction, Client, GuildMember, PermissionFlagsBits, SlashCommandBuilder } from "discord.js";
 import { PlayerMetadata } from "../types/PlayerMetadata.js";
 
 const regexYT = new RegExp("(^(https?\\:\\/\\/)?(www\\.youtube\\.com|youtu\\.be)\\/(watch\\?v=.{11}|.{11})$)|(^.{11}$)");
@@ -42,7 +34,7 @@ const downloadOptions = {
  * @returns The file path that it will be after transcoding it to ogg.
  */
 function getFilePath(filePath: string): string {
-	const oggFilePath = filePath.substr(0, filePath.lastIndexOf(".")).concat(".ogg");
+	const oggFilePath = filePath.substring(0, filePath.lastIndexOf(".")).concat(".ogg");
 
 	return oggFilePath;
 }
@@ -53,13 +45,16 @@ function getFilePath(filePath: string): string {
  * @returns True or False based on whether it exists or not.
  */
 function checkCache(filePath: string): boolean {
-	const ytId = filePath.substr(filePath.length - 15, 11);
+	const VIDEO_ID_LENGTH = 11;
+	const VIDEO_ID_AND_FILE_EXT_LENGTH = 15;
+
+	const ytId = filePath.substring(filePath.length - VIDEO_ID_AND_FILE_EXT_LENGTH, VIDEO_ID_LENGTH);
 	const audioFiles = fs.readdirSync("./bot/audioCache");
 
 	// The only thing worrying about this is that it's a N time.
 	// No idea how this would perform in say a 10000 item array.
 	for (const audioFile of audioFiles) {
-		const fileId = audioFile.substr(audioFile.length - 15, 11);
+		const fileId = audioFile.substring(audioFile.length - VIDEO_ID_AND_FILE_EXT_LENGTH, VIDEO_ID_LENGTH);
 
 		if (fileId == ytId) return true;
 	}
@@ -72,18 +67,18 @@ function checkCache(filePath: string): boolean {
  * @param query - The query to search youtube with.
  * @returns A youtube URL or null
  */
-async function searchSong(query: string | null): Promise<string | null> {
-	if (query == null) return null;
+async function searchSong(query: string): Promise<string | undefined> {
+	if (query == null) return undefined;
 	const results = await ytSearcher.search(query, { type: "video" });
 
-	if (results.currentPage?.first() == null) return null;
+	if (results.currentPage?.first() == null) return undefined;
 
-	if (results.currentPage?.first()?.url == undefined) return null;
+	if (results.currentPage?.first()?.url == undefined) return undefined;
 
-	return results.currentPage?.first()?.url as string;
+	return results.currentPage?.first()?.url;
 }
 
-async function run(client: Client, interaction: CommandInteraction): Promise<void> {
+async function run(client: Client, interaction: ChatInputCommandInteraction): Promise<void> {
 	await interaction.deferReply();
 
 	if (interaction.guild == null) {
@@ -92,22 +87,20 @@ async function run(client: Client, interaction: CommandInteraction): Promise<voi
 	}
 
 	// If the user isn't in voice, tell them to join.
-	if (!((interaction.member as GuildMember).voice.channel?.type == "GUILD_VOICE")) {
+	if (!((interaction.member as GuildMember).voice.channel?.type == ChannelType.GuildVoice)) {
 		await interaction.followUp({ content: "Please join a voice channel to use this command", ephemeral: true });
 		return;
 	}
 
-	const ytSong = interaction.options.getString("youtube") || "";
-	const searchResult = (await searchSong(interaction.options.getString("search"))) || "";
-	const youtubeSong = ytSong || searchResult;
+	const ytSong = interaction.options.getString("query", true);
+	const youtubeSong = await searchSong(ytSong);
 
-	// We use && because || would trigger true even if we had a song.
-	if (searchResult == "" && ytSong == "") {
+	if (youtubeSong == undefined) {
 		await interaction.followUp({ content: "Please provid a song or a search query.", ephemeral: true });
 		return;
 	}
 
-	if (!(regexYT.test(searchResult) || regexYT.test(ytSong))) {
+	if (!regexYT.test(youtubeSong)) {
 		await interaction.followUp({ content: "I couldn't find that song.", ephemeral: true });
 		return;
 	}
@@ -133,20 +126,20 @@ async function run(client: Client, interaction: CommandInteraction): Promise<voi
 	}
 
 	if (getVoiceConnection(interaction.guild.id) == undefined) {
-		joinVoiceChannel({
-			// The channel was checked up above
-			channelId: (interaction.member as GuildMember).voice.channelId as string,
-			guildId: interaction.guild.id,
-			adapterCreator: interaction.guild.voiceAdapterCreator,
-		});
-
 		await interaction.followUp({ content: `Joining the channel and playing ${youtubeSong}` });
 	} else {
 		await interaction.followUp({ content: `Adding ${youtubeSong} to queue` });
 	}
 
 	// Initialize our connection.
-	const connection = getVoiceConnection(interaction.guild.id) as VoiceConnection; // Voice Connection should be valid from the if statement above.
+	const connection =
+		getVoiceConnection(interaction.guild.id) ||
+		joinVoiceChannel({
+			// The channel was checked up above
+			channelId: (interaction.member as GuildMember).voice.channelId as string,
+			guildId: interaction.guild.id,
+			adapterCreator: interaction.guild.voiceAdapterCreator,
+		});
 
 	// Test if the listener count is greater than zero so that we don't register it N number of times.
 	// N being however many times the command was ran.
@@ -168,9 +161,10 @@ async function run(client: Client, interaction: CommandInteraction): Promise<voi
 		connection.on(VoiceConnectionStatus.Disconnected, async function disconnected(oldState, newState) {
 			try {
 				await Promise.race([
-					entersState(connection, VoiceConnectionStatus.Signalling, 5000),
-					entersState(connection, VoiceConnectionStatus.Connecting, 5000),
+					entersState(connection, VoiceConnectionStatus.Signalling, 5_000),
+					entersState(connection, VoiceConnectionStatus.Connecting, 5_000),
 				]);
+
 				// Seems to be reconnecting to a new channel - ignore disconnect
 			} catch (error) {
 				// Seems to be a real disconnect which SHOULDN'T be recovered from
@@ -180,30 +174,25 @@ async function run(client: Client, interaction: CommandInteraction): Promise<voi
 	}
 }
 
-const help = {
-	name: "play",
-	description: "Play a song in the bot.",
-	options: [
-		{
-			type: "STRING",
-			name: "youtube",
-			description: "A YouTube URL",
-			required: false,
-		},
-		{
-			type: "STRING",
-			name: "search",
-			description: "What you want to search youtube for.",
-			required: false,
-		},
-	],
-	aliases: [""],
-	level: "User",
-};
+const name = "play";
+const enabled = true;
+const guildOnly = true;
+const description = "Play a song in the bot.";
+const defaultPermission = PermissionFlagsBits.UseApplicationCommands;
+const options = new SlashCommandBuilder()
+	.setName(name)
+	.setDescription(description)
+	.addStringOption((option) => option.setName("query").setDescription("Youtube link, or something to search Youtube for.").setRequired(true))
+	.setDMPermission(!guildOnly)
+	.setDefaultMemberPermissions(defaultPermission);
 
 const config = {
-	enabled: true,
-	guildOnly: true,
+	name,
+	enabled,
+	description,
+	guildOnly,
+	options,
+	defaultPermission,
 };
 
-export { run, help, config };
+export { run, config };

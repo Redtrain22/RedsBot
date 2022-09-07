@@ -1,6 +1,6 @@
-import { Client, CommandInteraction, Message, MessageEmbed } from "discord.js";
+import { Client, Message, EmbedBuilder, SlashCommandBuilder, PermissionFlagsBits, ChatInputCommandInteraction } from "discord.js";
 
-async function run(client: Client, interaction: CommandInteraction): Promise<void> {
+async function run(client: Client, interaction: ChatInputCommandInteraction): Promise<void> {
 	function msToTime(ms: number) {
 		const days = Math.floor(ms / 86400000); // 24*60*60*1000
 		const daysms = ms % 86400000; // 24*60*60*1000
@@ -19,12 +19,12 @@ async function run(client: Client, interaction: CommandInteraction): Promise<voi
 		return str;
 	}
 
-	const ping = new MessageEmbed().setTitle("〽️ Ping!");
+	const ping = new EmbedBuilder().setTitle("〽️ Ping!");
 
 	const message = (await interaction.reply({ embeds: [ping], fetchReply: true })) as Message;
 
-	const pong = new MessageEmbed().setTitle("📶 Pong!").setTimestamp().setDescription(`
-	  **Response Time**: ${message.createdAt.getMilliseconds() - interaction.createdAt.getMilliseconds()} ms
+	const pong = new EmbedBuilder().setTitle("📶 Pong!").setTimestamp().setDescription(`
+	  **Response Time (Round Trip)**: ${message.createdTimestamp - interaction.createdTimestamp} ms
 	  **WebSocket Ping** ${Math.round(client.ws.ping)} ms
 	  **Uptime** ${msToTime(client.uptime as number)}
 	`);
@@ -32,17 +32,24 @@ async function run(client: Client, interaction: CommandInteraction): Promise<voi
 	await interaction.editReply({ embeds: [pong] });
 }
 
-const help = {
-	name: "ping",
-	description: "Ping... Pong!",
-	options: [],
-	aliases: [""],
-	level: "User",
-};
+const name = "ping";
+const enabled = true;
+const guildOnly = true;
+const description = "Ping... Pong!";
+const defaultPermission = PermissionFlagsBits.UseApplicationCommands;
+const options = new SlashCommandBuilder()
+	.setName(name)
+	.setDescription(description)
+	.setDMPermission(!guildOnly)
+	.setDefaultMemberPermissions(defaultPermission);
 
 const config = {
-	enabled: true,
-	guildOnly: true,
+	name,
+	enabled,
+	guildOnly,
+	description,
+	defaultPermission,
+	options,
 };
 
-export { run, help, config };
+export { run, config };

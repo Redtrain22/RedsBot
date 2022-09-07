@@ -1,4 +1,4 @@
-import { Client } from "discord.js";
+import { ActivityType, Client } from "discord.js";
 import { log } from "../managers/Logger.js";
 
 const once = false;
@@ -13,7 +13,7 @@ const run = (client: Client, shardID: number): void => {
 	);
 
 	// Make the bot "play the game" which is the help command with default prefix.
-	client.user?.setActivity("/help (me)", { type: "PLAYING" });
+	client.user?.setActivity("/help (me)", { type: ActivityType.Playing });
 };
 
 export { once, name, run };

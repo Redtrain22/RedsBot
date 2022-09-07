@@ -1,6 +1,6 @@
-import { ApplicationCommandOptionData, Client, CommandInteraction } from "discord.js";
+import { ChatInputCommandInteraction, Client, SlashCommandBuilder, PermissionFlagsBits } from "discord.js";
 
-async function run(client: Client, interaction: CommandInteraction): Promise<void> {
+async function run(client: Client, interaction: ChatInputCommandInteraction): Promise<void> {
 	const sides = interaction.options.getInteger("sides", true);
 	let amount = interaction.options.getInteger("amount") || 1;
 	const advantage = interaction.options.getBoolean("advantage") || false;
@@ -48,7 +48,7 @@ async function run(client: Client, interaction: CommandInteraction): Promise<voi
 	}
 
 	// Give our rolls to the user, the rest of the formatting is done here.
-	return await interaction.reply({
+	await interaction.reply({
 		content: `d${sides}x${amount}: [${formattedRolls.join(", ")}]${additive > 0 ? ` + ${additive}` : ""}\n\nTotal: ${rolls.reduce(
 			(total: number, rollResult: number) => total + rollResult,
 			additive
@@ -56,48 +56,28 @@ async function run(client: Client, interaction: CommandInteraction): Promise<voi
 	});
 }
 
-const help = {
-	name: "dice",
-	description: "Roll a die or roll several dice.",
-	options: [
-		{
-			type: "INTEGER",
-			name: "sides",
-			description: "Number of sides the di(c)e will have.",
-			required: true,
-		},
-		{
-			type: "INTEGER",
-			name: "amount",
-			description: "The amount of di(c)e to roll.",
-			required: false,
-		},
-		{
-			type: "BOOLEAN",
-			name: "advantage",
-			description: "Whether the roll has advantage or not.",
-			required: false,
-		},
-		{
-			type: "BOOLEAN",
-			name: "disadvantage",
-			description: "Whether the roll has disadvantage or not.",
-			required: false,
-		},
-		{
-			type: "INTEGER",
-			name: "additive",
-			description: "A number to add to the roll",
-			required: false,
-		},
-	] as ApplicationCommandOptionData[],
-	aliases: [""],
-	level: "User",
-};
+const name = "dice";
+const enabled = true;
+const guildOnly = false;
+const description = "Roll a die or roll several dice.";
+const defaultPermission = PermissionFlagsBits.UseApplicationCommands;
+const options = new SlashCommandBuilder()
+	.setName(name)
+	.setDescription(description)
+	.addIntegerOption((option) => option.setName("sides").setDescription("Number of sides the di(c)e will have.").setRequired(true))
+	.addIntegerOption((option) => option.setName("amount").setDescription("The amount of di(c)e to roll.").setRequired(false))
+	.addIntegerOption((option) => option.setName("additive").setDescription("A number to add to the roll").setRequired(false))
+	.addBooleanOption((option) => option.setName("advantage").setDescription("Whether the roll has advantage or not.").setRequired(false))
+	.addBooleanOption((option) => option.setName("disadvantage").setDescription("Whether the roll has disadvantage or not.").setRequired(false))
+	.setDefaultMemberPermissions(defaultPermission);
 
 const config = {
-	enabled: true,
-	guildOnly: false,
+	name,
+	enabled,
+	guildOnly,
+	description,
+	defaultPermission,
+	options,
 };
 
-export { run, help, config };
+export { run, config };

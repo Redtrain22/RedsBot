@@ -1,13 +1,12 @@
 import { Command } from "../types/Command.js";
 
-import { ApplicationCommandPermissionData, Client, Collection } from "discord.js";
+import { ApplicationCommandPermissions, ApplicationCommandPermissionType, Client, Collection, PermissionFlagsBits } from "discord.js";
 import fs from "fs";
 import { log } from "./Logger.js";
 import { getConfig } from "./Config.js";
 const config = getConfig();
 
 const commands = new Collection<string, Command>();
-const aliases = new Collection<string, string>();
 
 /**
  * Initialize the Command Manager.
@@ -20,9 +19,8 @@ export async function init(): Promise<void> {
 
 		const command: Command = await import(`../commands/${fileName}`);
 
-		log(`Loading command ${command.help.name.toLowerCase()}`);
-		commands.set(command.help.name.toLowerCase(), command);
-		setAliases(command.help.name.toLowerCase());
+		log(`Loading command ${command.config.name.toLowerCase()}`);
+		commands.set(command.config.name.toLowerCase(), command);
 	}
 }
 
@@ -52,7 +50,6 @@ export async function reloadCommand(commandName: string): Promise<void> {
 	const command: Command = await import(`../commands/${commandName}`);
 
 	commands.set(commandName, command);
-	setAliases(command.help.name.toLowerCase());
 }
 
 /**
@@ -60,7 +57,7 @@ export async function reloadCommand(commandName: string): Promise<void> {
  * @param client - A Discord.JS client to register the slash commands to.
  * @param scope - "global", "guilds", or a guild's ID to register slash commands to.
  */
-export async function refreshSlashCommands(client: Client, scope = "global"): Promise<void> {
+export async function registerSlashCommands(client: Client, scope = "global"): Promise<void> {
 	const { globalCommands, guildCommands } = generateSlashCommands();
 
 	if (scope == "global") {
@@ -102,10 +99,9 @@ function generateSlashCommands() {
 		if (!command.config.enabled) continue;
 		// We're only going to register commands that don't require a guild globally.
 		if (command.config.guildOnly) continue; // We're only generating global commands here.
-		const commandName = command.help.name.toLowerCase();
-		if (command.help.level == "User") {
-			globalCommands.push({ name: commandName, description: command.help.description, options: command.help.options });
-		}
+		// if (command.help.defaultPermission == PermissionFlagsBits.UseApplicationCommands) {
+		globalCommands.push(command.config.options.toJSON());
+		// }
 	}
 
 	// Generate guild commands here.
@@ -113,10 +109,9 @@ function generateSlashCommands() {
 		if (!command.config.enabled) continue;
 		// We're only going to register commands that don't require a guild globally.
 		if (!command.config.guildOnly) continue; // Only generate guild commands here.
-		const commandName = command.help.name.toLowerCase();
-		if (command.help.level == "User") {
-			guildCommands.push({ name: commandName, description: command.help.description, options: command.help.options });
-		}
+		// if (command.help.level == "User") {
+		guildCommands.push(command.config.options.toJSON());
+		// }
 	}
 
 	return { globalCommands, guildCommands };
@@ -143,35 +138,43 @@ export async function unregisterSlashCommands(client: Client, scope = "global"):
 /**
  * Loop through each guild in the client.guilds.cache Manager and set guild permissions there.
  * @param client - A Discord.JS client.
+ * @param scope - The id of the guild to setPermissions for. Default to All Guilds.
+ * @param overrides - The overrides to set for the guilds. Defaults to generated overrides from config.
  */
 async function setPermissions(client: Client, scope = "global", overrides = generateOverrides(client)): Promise<void> {
 	const { globalCommandIds, guildCommandIds } = await generateCommandIds(client);
 
 	if (scope == "global") {
-		// The first element is the guildId, but we don't need that.
 		for (const [, guild] of client.guilds.cache) {
 			for (const [commandName, permissions] of overrides) {
+				// The first element is the guildId, but we don't need that.
 				// If the command doesn't exist as an ID we're going to ignore it.
-				if (globalCommandIds.get(commandName) == undefined) continue;
-
-				await guild?.commands.permissions.add({ command: globalCommandIds.get(commandName) as string, permissions: permissions });
+				const commandId = globalCommandIds.get(commandName);
+				if (commandId == undefined) continue;
+				await guild?.commands.permissions.add({
+					command: commandId,
+					permissions: permissions,
+					token: config.discordToken,
+				});
 			}
-
-			log(`Set slash command permissions in guild "${guild?.name}" (${guild?.id})`);
+			log(`Set slash Command Permissions in guild "${guild?.name}" (${guild?.id})`);
 		}
 	} else {
-		guildCommandIds.forEach(async (ids, guildId) => {
-			const guild = await client.guilds.fetch(guildId);
+		const guild = await client.guilds.fetch(scope);
+		const guildCommands = guildCommandIds.get(guild.id);
+		if (guildCommands == undefined) return; // No Commands to Update.
 
-			// I don't think we need to use the command name here so we exclude it.
-			ids.forEach(async (commandId) => {
-				if (overrides.get(guildId) != undefined) {
-					await guild.commands.permissions.set({ command: commandId, permissions: overrides.get(guildId) as ApplicationCommandPermissionData[] });
-				}
+		guildCommands.forEach(async (id, commandName) => {
+			const override = overrides.get(commandName);
+			if (override == undefined) return;
+
+			await guild.commands.permissions.add({
+				command: id,
+				permissions: override,
+				token: config.discordToken,
 			});
-
-			log(`Set slash command permissions in guild "${guild?.name}" (${guild?.id})`);
 		});
+		log(`Set Slash Command Permissions in guild "${guild?.name}" (${guild?.id})`);
 	}
 }
 
@@ -211,60 +214,36 @@ async function generateCommandIds(client: Client) {
  * Generate permission overrides for commands.
  * @returns A Collection of permissions in a key-value pair, the key being a guild ID and the value being command permission data.
  */
-function generateOverrides(client: Client): Collection<string, ApplicationCommandPermissionData[]> {
-	const permissions = new Collection<string, ApplicationCommandPermissionData[]>();
+function generateOverrides(client: Client): Collection<string, ApplicationCommandPermissions[]> {
+	const permissions = new Collection<string, ApplicationCommandPermissions[]>();
 
 	for (const [, command] of commands) {
 		if (!command.config.enabled) continue;
 
 		// We can skip over global commands, which ARE NOT guildOnly AND User level.
-		if (command.help.level == "User" && !command.config.guildOnly) continue;
+		if (command.config.defaultPermission == PermissionFlagsBits.UseApplicationCommands && !command.config.guildOnly) continue;
 
 		client.guilds.cache.forEach((guild) => {
 			const guildId = guild.id;
 
-			if (command.help.level == "Owner") {
-				config.ownerIds.forEach((ownerId) => {
-					if (permissions.get(guildId) == undefined) permissions.set(`${guildId}`, []);
+			// TODO Reimplement system for all role types in the config. Do this in a better way than just if else if possible.
+			// [x] Owner
+			// [ ] Dev
+			// [ ] Admin
+			config.ownerIds.forEach((ownerId) => {
+				if (permissions.get(guildId) == undefined) return;
 
-					permissions.set(
-						`${guildId}`,
-						permissions.get(guildId)?.concat([{ id: ownerId, type: "USER", permission: true }]) as ApplicationCommandPermissionData[]
-					);
-				});
-			} else if (command.help.level == "Dev") {
-				config.devIds.forEach((devId) => {
-					if (permissions.get(guildId) == undefined) permissions.set(`${guildId}`, []);
-
-					permissions.set(
-						`${guildId}`,
-						permissions.get(guildId)?.concat([{ id: devId, type: "USER", permission: true }]) as ApplicationCommandPermissionData[]
-					);
-				});
-			} else if (command.help.level == "Admin") {
-				config.adminIds.forEach((adminId) => {
-					if (permissions.get(guildId) == undefined) permissions.set(`${guildId}`, []);
-
-					permissions.set(
-						`${guildId}`,
-						permissions.get(guildId)?.concat([{ id: adminId, type: "USER", permission: true }]) as ApplicationCommandPermissionData[]
-					);
-				});
-			}
+				permissions.set(
+					guildId,
+					permissions
+						.get(guildId)
+						?.concat([{ id: ownerId, type: ApplicationCommandPermissionType.User, permission: true }]) as ApplicationCommandPermissions[]
+				);
+			});
 		});
 	}
 
 	return permissions;
-}
-
-/**
- * Set the aliases of a command from the commands collections.
- * @param commandName - The commandName to get from the command collection to register our aliases for.
- */
-export function setAliases(commandName: string): void {
-	commands.get(commandName)?.help.aliases.forEach((alias) => {
-		if (!(alias == "")) aliases.set(alias, commandName);
-	});
 }
 
 /**
@@ -273,12 +252,4 @@ export function setAliases(commandName: string): void {
  */
 export function getCommands(): Collection<string, Command> {
 	return commands;
-}
-
-/**
- * Get all the command aliases for the bot.
- * @returns A Collection that returns a command name when accessing an alias.
- */
-export function getAliases(): Collection<string, string> {
-	return aliases;
 }
