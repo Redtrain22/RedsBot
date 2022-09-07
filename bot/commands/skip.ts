@@ -30,7 +30,7 @@ const defaultPermission = PermissionFlagsBits.UseApplicationCommands;
 const options = new SlashCommandBuilder()
 	.setName(name)
 	.setDescription(description)
-	.addStringOption((option) => option.setName("song").setDescription("Skip a song in queue.").setRequired(false))
+	.addIntegerOption((option) => option.setName("song").setDescription("Skip a song in queue.").setRequired(false))
 	.setDMPermission(!guildOnly)
 	.setDefaultMemberPermissions(defaultPermission);
 
