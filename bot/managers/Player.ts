@@ -52,10 +52,7 @@ export function play(interaction: CommandInteraction, connection: VoiceConnectio
 	queueManager.shiftQueue(interaction.guild.id);
 
 	// Base case for recursion.
-	if (
-		(queueManager.getQueue(interaction.guild.id) == undefined || queueManager.getQueue(interaction.guild.id)?.length == 0) &&
-		queueManager.getCurrentSong(interaction.guild.id) == undefined
-	) {
+	if (queueManager.getCurrentSong(interaction.guild.id) == undefined) {
 		setTimeout(async function leave() {
 			// We test again to make sure there's no songs in queue or in the current song.
 			if (
@@ -70,7 +67,7 @@ export function play(interaction: CommandInteraction, connection: VoiceConnectio
 				}
 				connection.destroy();
 			}
-		}, 10000);
+		}, 10_000);
 	} else {
 		audioPlayer?.play(queueManager.getCurrentSong(interaction.guild.id) as AudioResource); // We've check that the current song isn't undefined above.
 		connection.subscribe(audioPlayer);
