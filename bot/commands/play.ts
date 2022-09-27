@@ -59,7 +59,7 @@ function getCacheFile(videoId: string): string | undefined {
 }
 
 /**
- * Search a songn on youtube.
+ * Search a song on youtube.
  * @param query - The query to search youtube with.
  * @returns A youtube URL or null
  */
@@ -68,7 +68,6 @@ async function searchSong(query: string): Promise<string | undefined> {
 	const results = await ytSearcher.search(query, { type: "video" });
 
 	if (results.currentPage?.first() == null) return undefined;
-
 	if (results.currentPage?.first()?.url == undefined) return undefined;
 
 	return results.currentPage?.first()?.url;
