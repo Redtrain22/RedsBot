@@ -1,5 +1,5 @@
 import * as fs from "node:fs";
-import * as youtube from "youtube-dl-exec";
+import youtube from "youtube-dl-exec";
 import * as queueManager from "../managers/Queue.js";
 import * as playerManager from "../managers/Player.js";
 import * as logger from "../managers/Logger.js";
@@ -13,13 +13,7 @@ import { PlayerMetadata } from "../types/PlayerMetadata.js";
 const regexYT = new RegExp("(^(https?\\:\\/\\/)?(www\\.youtube\\.com|youtu\\.be)\\/(watch\\?v=.{11}|.{11})$)|(^.{11}$)");
 const ytSearcher = new YTSearcher(youtubeToken);
 
-const queryOptions = {
-	youtubeSkipDashManifest: true,
-	output: "./bot/audioCache/%(title)s-%(id)s.%(ext)s",
-	getFilename: true,
-};
-
-const downloadOptions = {
+const DOWNLOAD_OPTIONS = {
 	extractAudio: true,
 	audioFormat: "opus",
 	recodeVideo: "ogg",
@@ -29,41 +23,43 @@ const downloadOptions = {
 };
 
 /**
- * Get the ogg file path from the file path passed.
- * @param fileName - The name of the file in the cache.
- * @returns The file path that it will be after transcoding it to ogg.
+ * Get the ogg file path from the video ID passed.
+ * Will download the file into the cache if not in the cache.
+ * @param youtubeSong - The name of the file in the cache.
+ * @returns The path of the file.
  */
-function getFilePath(filePath: string): string {
-	const oggFilePath = filePath.substring(0, filePath.lastIndexOf(".")).concat(".ogg");
+async function getFile(youtubeSong: string): Promise<string> {
+	const SUBSTRING_CHAR_START = "watch?v=";
+	const SUBSTRING_START = SUBSTRING_CHAR_START.length + youtubeSong.indexOf(SUBSTRING_CHAR_START);
+	const SUBSTRING_END = SUBSTRING_START + 11;
+	const cacheFile = getCacheFile(youtubeSong.substring(SUBSTRING_START, SUBSTRING_END));
 
-	return oggFilePath;
+	if (cacheFile == undefined) await youtube(youtubeSong, DOWNLOAD_OPTIONS);
+
+	// TODO Find a way to not call the getCacheFile function twice
+	const videoFile = getCacheFile(youtubeSong.substring(SUBSTRING_START, SUBSTRING_END)) as string;
+	const oggFile = videoFile.substring(0, videoFile.lastIndexOf(".")).concat(".ogg");
+
+	return oggFile;
 }
 
 /**
- * A pure file path to check to see if it exists.
- * @param filePath - The path to a file that we want to check.
- * @returns True or False based on whether it exists or not.
+ * Get an audio from the cache by video ID.
+ * @param videoId - The ID of the youtube video.
+ * @returns The file path of the audio file or undefined if it's not in cache.
  */
-function checkCache(filePath: string): boolean {
-	const VIDEO_ID_LENGTH = 11;
-	const VIDEO_ID_AND_FILE_EXT_LENGTH = 15;
-
-	const ytId = filePath.substring(filePath.length - VIDEO_ID_AND_FILE_EXT_LENGTH, VIDEO_ID_LENGTH);
+function getCacheFile(videoId: string): string | undefined {
 	const audioFiles = fs.readdirSync("./bot/audioCache");
+	const audioFile = audioFiles.filter((file) => file.includes(videoId));
+	// Nothing *should* include the same ID, however it could possibly be included in the name for whatever reason.
+	// Which means that this could be a bug if the name includes a matching ID. (assuming some sanity?)
+	if (audioFile.length > 0) return "./bot/audioCache/".concat(audioFile[0]);
 
-	// The only thing worrying about this is that it's a N time.
-	// No idea how this would perform in say a 10000 item array.
-	for (const audioFile of audioFiles) {
-		const fileId = audioFile.substring(audioFile.length - VIDEO_ID_AND_FILE_EXT_LENGTH, VIDEO_ID_LENGTH);
-
-		if (fileId == ytId) return true;
-	}
-
-	return fs.existsSync(`${filePath}`);
+	return undefined;
 }
 
 /**
- * Search a songn on youtube.
+ * Search a song on youtube.
  * @param query - The query to search youtube with.
  * @returns A youtube URL or null
  */
@@ -72,7 +68,6 @@ async function searchSong(query: string): Promise<string | undefined> {
 	const results = await ytSearcher.search(query, { type: "video" });
 
 	if (results.currentPage?.first() == null) return undefined;
-
 	if (results.currentPage?.first()?.url == undefined) return undefined;
 
 	return results.currentPage?.first()?.url;
@@ -92,25 +87,16 @@ async function run(client: Client, interaction: ChatInputCommandInteraction): Pr
 		return;
 	}
 
-	const ytSong = interaction.options.getString("query", true);
-	const youtubeSong = await searchSong(ytSong);
+	const query = interaction.options.getString("query", true);
+	const youtubeSong = regexYT.test(query) ? query : await searchSong(query);
 
-	if (youtubeSong == undefined) {
-		await interaction.followUp({ content: "Please provid a song or a search query.", ephemeral: true });
-		return;
-	}
-
-	if (!regexYT.test(youtubeSong)) {
+	if (youtubeSong == undefined || !regexYT.test(youtubeSong)) {
 		await interaction.followUp({ content: "I couldn't find that song.", ephemeral: true });
 		return;
 	}
 
-	// Generate the filePath so that we know what we're working with.
-	// The default method returns the filepath due to our queryOptions telling it to return the file path.
-	const filePath = getFilePath((await youtube.default(youtubeSong, queryOptions)) as unknown as string);
-
-	// Check the audio cache for the song
-	if (!checkCache(filePath)) await youtube.default(youtubeSong, downloadOptions);
+	// Get the file path of the song from the audioCache, if it's not in cache download it.
+	const filePath = await getFile(youtubeSong);
 
 	// Add the song as an AudioResource.
 	try {
