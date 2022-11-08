@@ -73,14 +73,6 @@ async function destroy() {
 }
 
 async function init() {
-	if (!existsSync("./logs")) {
-		mkdirSync("./logs");
-	}
-
-	if (!existsSync("./data")) {
-		mkdirSync("./data");
-	}
-
 	if (!existsSync("./bot/audioCache")) {
 		mkdirSync("./bot/audioCache");
 	}
