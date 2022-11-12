@@ -1,0 +1,11 @@
+{
+	"javascript.preferences.quoteStyle": "double",
+	"editor.formatOnSave": true,
+	"editor.fontLigatures": true,
+	"editor.tabSize": 2,
+	"editor.insertSpaces": false,
+	"editor.bracketPairColorization.enabled": true,
+	"editor.detectIndentation": false,
+	"editor.guides.bracketPairs": "active",
+	"editor.defaultFormatter": "esbenp.prettier-vscode"
+}
