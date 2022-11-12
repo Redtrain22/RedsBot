@@ -8,9 +8,6 @@ logs/
 # Audio Cache
 audioCache/
 
-# Editor
-.vscode/
-
 # Flatfile Data
 data/
 
