@@ -1,7 +1,12 @@
 import { Config } from "../types/Config.js";
 
-import { readFileSync, existsSync, writeFileSync, renameSync } from "node:fs";
+import { mkdirSync, readFileSync, existsSync, writeFileSync, renameSync } from "node:fs";
 import { log, error } from "./Logger.js";
+
+// Make data directory here to make sure that we have a place to put the config file.
+if (!existsSync("./data")) {
+	mkdirSync("./data");
+}
 
 // Make our config.json template here.
 const configTemplate: Config = {
@@ -40,6 +45,9 @@ export function init(): void {
 	} else {
 		log("Config not found! Time to make one. Please fill out the fields.");
 		writeFileSync("./data/config.json", JSON.stringify(configTemplate, null, 2));
+		log("Shutting the bot down as no discordToken exists yet.");
+		process.exitCode = 1;
+		process.exit();
 	}
 }
 

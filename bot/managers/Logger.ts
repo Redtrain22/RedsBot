@@ -7,6 +7,11 @@ import fs from "node:fs";
 import util from "node:util";
 import path from "node:path";
 
+// Make log dir here to prevent errors due to dirs not made when Logger is imported.
+if (!fs.existsSync("./logs")) {
+	fs.mkdirSync("./logs");
+}
+
 function getPath(date: string): string {
 	return path.resolve(`./logs/${date}.log`);
 }
