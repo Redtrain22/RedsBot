@@ -38,7 +38,6 @@
 				"ignoreReadBeforeAssign": false
 			}
 		],
-		"no-unused-vars": ["error", { "args": "none" }],
 		"no-var": ["error"],
 		"default-case-last": ["error"],
 		"no-useless-escape": ["error"],
@@ -48,6 +47,8 @@
 		"@typescript-eslint/array-type": ["error"],
 		"@typescript-eslint/explicit-module-boundary-types": ["error"],
 		"no-redeclare": ["off"],
-		"@typescript-eslint/no-redeclare": ["error", { "ignoreDeclarationMerge": true }]
+		"@typescript-eslint/no-redeclare": ["error", { "ignoreDeclarationMerge": true }],
+		"no-unused-vars": "off",
+		"@typescript-eslint/no-unused-vars": ["error", { "args": "none" }]
 	}
 }
