@@ -1,6 +1,6 @@
 import { getCommands } from "../managers/Commands.js";
 const commands = getCommands();
-import * as logger from "../managers/Logger.js";
+import log, { error, LogType } from "../managers/Logger.js";
 import { ChatInputCommandInteraction, Client, Interaction, InteractionType } from "discord.js";
 import { Statistic } from "../managers/Database.js";
 
@@ -54,17 +54,17 @@ async function handleCommand(client: Client, interaction: ChatInputCommandIntera
 		await cmd.run(client, interaction);
 
 		if (!interaction.guild) {
-			logger.log(
+			log(
 				`"${interaction.member?.user.username}#${interaction.member?.user.discriminator}" ran command ${interaction.commandName} in DMs`,
-				"cmd"
+				LogType.CMD
 			);
 		} else {
-			logger.log(
+			log(
 				`"${interaction.member?.user.username}#${interaction.member?.user.discriminator}" ran command ${interaction.commandName} in guild "${interaction.guild?.name}" (${interaction.guild?.id})`,
-				"cmd"
+				LogType.CMD
 			);
 		}
-	} catch (error) {
+	} catch (err) {
 		if (interaction.deferred || interaction.replied) {
 			await interaction.followUp({
 				content: "There was an error executing this, please try again later or contact the bot owner.",
@@ -76,7 +76,7 @@ async function handleCommand(client: Client, interaction: ChatInputCommandIntera
 				ephemeral: true,
 			});
 		}
-		logger.error(error);
+		error(err);
 	}
 }
 

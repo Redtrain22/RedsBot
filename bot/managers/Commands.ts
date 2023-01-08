@@ -2,7 +2,7 @@ import { Command } from "../types/Command.js";
 
 import { ApplicationCommandPermissions, ApplicationCommandPermissionType, Client, Collection, PermissionFlagsBits } from "discord.js";
 import fs from "node:fs";
-import { log } from "./Logger.js";
+import log from "./Logger.js";
 import { getConfig } from "./Config.js";
 const config = getConfig();
 

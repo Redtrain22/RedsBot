@@ -7,6 +7,17 @@ import fs from "node:fs";
 import util from "node:util";
 import path from "node:path";
 
+export enum LogType {
+	Log = "log",
+	Warn = "warn",
+	Error = "error",
+	Debug = "debug",
+	CMD = "cmd",
+	Ready = "ready",
+	Shard = "shard",
+	Database = "database",
+}
+
 // Make log dir here to prevent errors due to dirs not made when Logger is imported.
 if (!fs.existsSync("./logs")) {
 	fs.mkdirSync("./logs");
@@ -28,13 +39,13 @@ function writeToFile(content: unknown, type: string, timestamp: string, date: st
 	}
 }
 
-function logger(content: unknown, type = "log") {
+function logger(content: unknown, type = LogType.Log) {
 	// Calculate this each time so the date and timestamp are accurate.
 	const timestamp = `[${moment().format("YYYY-MM-DD HH:mm:ss")}] |`;
 	const date = moment().format("YYYY-MM-DD");
 
 	switch (type) {
-		case "log": {
+		case LogType.Log: {
 			writeToFile(content, type.toUpperCase(), timestamp, date);
 			console.log(
 				`${timestamp} ${chalk.blue.bold(type.toUpperCase())} ${
@@ -44,7 +55,7 @@ function logger(content: unknown, type = "log") {
 			break;
 		}
 
-		case "warn": {
+		case LogType.Warn: {
 			writeToFile(content, type.toUpperCase(), timestamp, date);
 			console.log(
 				`${timestamp} ${chalk.yellow(type.toUpperCase())} ${
@@ -54,7 +65,7 @@ function logger(content: unknown, type = "log") {
 			break;
 		}
 
-		case "error": {
+		case LogType.Error: {
 			writeToFile(content, type.toUpperCase(), timestamp, date);
 			console.log(
 				`${timestamp} ${chalk.bold.red(type.toUpperCase())} ${
@@ -64,7 +75,7 @@ function logger(content: unknown, type = "log") {
 			break;
 		}
 
-		case "debug": {
+		case LogType.Debug: {
 			writeToFile(content, type.toUpperCase(), timestamp, date);
 			console.log(
 				`${timestamp} ${chalk.cyan(type.toUpperCase())} ${
@@ -74,7 +85,7 @@ function logger(content: unknown, type = "log") {
 			break;
 		}
 
-		case "cmd": {
+		case LogType.CMD: {
 			writeToFile(content, type.toUpperCase(), timestamp, date);
 			console.log(
 				`${timestamp} ${chalk.white.bold(type.toUpperCase())} ${
@@ -84,19 +95,19 @@ function logger(content: unknown, type = "log") {
 			break;
 		}
 
-		case "ready": {
+		case LogType.Ready: {
 			writeToFile(content, type.toUpperCase(), timestamp, date);
 			console.log(`${timestamp} ${chalk.green.bold(type.toUpperCase())} ${content}`);
 			break;
 		}
 
-		case "shard": {
+		case LogType.Shard: {
 			writeToFile(content, type.toUpperCase(), timestamp, date);
 			console.log(`${timestamp} ${chalk.yellow.bold(type.toUpperCase())} ${content}`);
 			break;
 		}
 
-		case "database": {
+		case LogType.Database: {
 			writeToFile(content, type.toUpperCase(), timestamp, date);
 			console.log(`${timestamp} ${chalk.cyan.bold(type.toUpperCase())} ${content}`);
 			break;
@@ -112,7 +123,7 @@ function logger(content: unknown, type = "log") {
  * @param content - The thing to log out.
  * @param type - The type of log you want.
  */
-export function log(content: unknown, type?: string): void {
+export default function log(content: unknown, type?: LogType): void {
 	logger(content, type);
 }
 
@@ -121,7 +132,7 @@ export function log(content: unknown, type?: string): void {
  * @param content - The error to log.
  */
 export function error(content: unknown): void {
-	logger(content, "error");
+	logger(content, LogType.Error);
 }
 
 /**
@@ -129,7 +140,7 @@ export function error(content: unknown): void {
  * @param content - The warn to log.
  */
 export function warn(content: unknown): void {
-	logger(content, "warn");
+	logger(content, LogType.Warn);
 }
 
 /**
@@ -137,7 +148,7 @@ export function warn(content: unknown): void {
  * @param content - The debug to log.
  */
 export function debug(content: unknown): void {
-	logger(content, "debug");
+	logger(content, LogType.Debug);
 }
 
 /**
@@ -145,5 +156,5 @@ export function debug(content: unknown): void {
  * @param content - The cmd to log.
  */
 export function cmd(content: unknown): void {
-	logger(content, "cmd");
+	logger(content, LogType.CMD);
 }

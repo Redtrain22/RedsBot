@@ -1,7 +1,7 @@
 import { Config } from "../types/Config.js";
 
 import { mkdirSync, readFileSync, existsSync, writeFileSync, renameSync } from "node:fs";
-import { log, error } from "./Logger.js";
+import log, { error } from "./Logger.js";
 
 // Make data directory here to make sure that we have a place to put the config file.
 if (!existsSync("./data")) {
