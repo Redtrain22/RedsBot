@@ -1,4 +1,4 @@
-import { Sequelize, DataTypes, Dialect } from "sequelize";
+import { Sequelize, DataTypes } from "sequelize";
 import { getConfig } from "./Config.js";
 const config = getConfig();
 import log, { error, LogType } from "./Logger.js";
@@ -14,58 +14,55 @@ import { Statistic } from "../models/Statistic.js";
  * @returns A fully made Sequelize object.
  */
 function createDB(): Sequelize {
-	const dialect = config.databaseType.toLowerCase();
+	// SQlite doesn't need normal database entries.
+	if (config.databaseType == "sqlite") {
+		return new Sequelize({
+			dialect: config.databaseType,
 
-	switch (dialect) {
-		case "sqlite":
-			return new Sequelize({
-				dialect: dialect,
+			// Where the sqlite3 database will sit.
+			storage: "./data/data.sqlite",
 
-				// Where the sqlite3 database will sit.
-				storage: "./data/data.sqlite",
+			logging: config.databaseLogging ? (query: unknown) => log(query, LogType.Database) : false,
 
-				logging: config.databaseLogging ? (query: unknown) => log(query, LogType.Database) : false,
+			pool: {
+				// Max number of clients
+				max: 25,
 
-				pool: {
-					// Max number of clients
-					max: 25,
+				// Min number of clients
+				min: 0,
 
-					// Min number of clients
-					min: 0,
-
-					// Idle time for a client
-					idle: 20000,
-				},
-			});
-
-		default:
-			return new Sequelize({
-				dialect: dialect as Dialect,
-
-				host: config.databaseHost,
-
-				port: config.databasePort,
-
-				database: config.databaseName,
-
-				username: config.databaseUser,
-
-				password: config.databasePassword,
-
-				logging: config.databaseLogging ? (query) => log(query, LogType.Database) : false,
-
-				pool: {
-					// Max number of clients
-					max: 25,
-
-					// Min number of clients
-					min: 0,
-
-					// Idle time for a client
-					idle: 20000,
-				},
-			});
+				// Idle time for a client
+				idle: 20000,
+			},
+		});
 	}
+
+	return new Sequelize({
+		dialect: config.databaseType,
+
+		host: config.databaseHost,
+
+		port: config.databasePort,
+
+		database: config.databaseName,
+
+		username: config.databaseUser,
+
+		password: config.databasePassword,
+
+		logging: config.databaseLogging ? (query) => log(query, LogType.Database) : false,
+
+		pool: {
+			// Max number of clients
+			max: 25,
+
+			// Min number of clients
+			min: 0,
+
+			// Idle time for a client
+			idle: 20000,
+		},
+	});
 }
 
 /**

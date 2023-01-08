@@ -1,7 +1,6 @@
-import { Config } from "../types/Config.js";
-
+import { Config, Dialects, isValidDialect } from "../types/Config.js";
 import { mkdirSync, readFileSync, existsSync, writeFileSync, renameSync } from "node:fs";
-import log, { error } from "./Logger.js";
+import log, { error, warn } from "./Logger.js";
 
 // Make data directory here to make sure that we have a place to put the config file.
 if (!existsSync("./data")) {
@@ -16,7 +15,7 @@ const configTemplate: Config = {
 	adminIds: [],
 	discordToken: "Replace Me",
 	youtubeToken: "Replace Me",
-	databaseType: "SQLite",
+	databaseType: "sqlite",
 	databaseHost: "127.0.0.1",
 	databasePort: NaN,
 	databaseName: "Replace Me",
@@ -39,7 +38,7 @@ export function init(): void {
 			checkFields(); // Check for fields that aren't filled.
 			appendConfig(); // Check for config update and ONLY APPEND TO IT.
 		} catch (err) {
-			log("Config error, looks like a formatting issue.");
+			log("Config error, commonly a formatting issue.");
 			error(err);
 		}
 	} else {
@@ -69,7 +68,7 @@ function appendConfig(): void {
 
 			// Check if field exists.
 			if (!userConfig[configField as keyof Config]) {
-				log(`You're missing ${configField}, adding it to config. Please set the field!`);
+				warn(`You're missing ${configField}, adding it to config. Please set the field!`);
 				userConfig[configField as keyof Config] = configTemplate[configField as keyof Config] as never; // Set the new field to the default value.
 			}
 		}
@@ -88,15 +87,17 @@ function appendConfig(): void {
  * Check the fields of the config.
  */
 function checkFields(): void {
-	let isSqliteDB = false;
-
 	for (const configField of Object.keys(configTemplate)) {
 		// We don't need to test these fields in here.
 		// Version should now be the new "default value".
 		if (configField == "version") continue;
-		// if (configField == "databaseType") continue;
 		if (configField == "databaseType") {
-			if (userConfig[configField].toLowerCase() == "sqlite") isSqliteDB = true;
+			const dialect = userConfig[configField].toLowerCase();
+			if (!isValidDialect(dialect)) {
+				error(`Not a valid dialect. Your choices are ${Dialects.join(", ")}`);
+				continue;
+			}
+			userConfig[configField] = dialect;
 			continue;
 		}
 
@@ -106,14 +107,14 @@ function checkFields(): void {
 		if (configField == "adminIds") continue;
 
 		// Skip fields not required for SQLite
-		if (isSqliteDB) {
+		if (userConfig["databaseType"] == "sqlite") {
 			const skipFields = ["databaseUser", "databasePassword", "databaseHost", "databasePort", "databaseName"];
 			if (skipFields.includes(configField)) continue;
 		}
 
 		// Check if config[configField] is there AND if the field is the default value.
 		if (userConfig[configField as keyof Config] && userConfig[configField as keyof Config] == configTemplate[configField as keyof Config]) {
-			log(`You didn't set ${configField} in your config. Please set the field!`);
+			warn(`You didn't set ${configField} in your config. Please set the field!`);
 		}
 	}
 }
