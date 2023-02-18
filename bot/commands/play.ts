@@ -34,7 +34,7 @@ async function getFile(youtubeSong: string): Promise<string> {
 	const SUBSTRING_END = SUBSTRING_START + 11;
 	const cacheFile = getCacheFile(youtubeSong.substring(SUBSTRING_START, SUBSTRING_END));
 
-	if (cacheFile == undefined) await youtube(youtubeSong, DOWNLOAD_OPTIONS);
+	if (cacheFile == undefined) await youtube.exec(youtubeSong, DOWNLOAD_OPTIONS);
 
 	// TODO Find a way to not call the getCacheFile function twice
 	const videoFile = getCacheFile(youtubeSong.substring(SUBSTRING_START, SUBSTRING_END)) as string;
