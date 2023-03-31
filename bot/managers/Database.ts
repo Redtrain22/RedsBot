@@ -8,6 +8,8 @@ let sequelize: Sequelize;
 
 // Declare our models here.
 import { Statistic } from "../models/Statistic.js";
+import { Tally } from "../models/Tally.js";
+import { TallyRules } from "../models/TallyRules.js";
 
 /**
  * Create the DB with options from the config.
@@ -109,6 +111,40 @@ function tableInit() {
 			updatedAt: DataTypes.DATE,
 		},
 		{ sequelize: sequelize, modelName: "Statistic" }
+	);
+
+	Tally.init(
+		{
+			guildId: {
+				type: DataTypes.STRING,
+				allowNull: false,
+			},
+			userId: {
+				type: DataTypes.STRING,
+				allowNull: false,
+			},
+			ruleName: {
+				type: DataTypes.STRING,
+				allowNull: false,
+			},
+			tallyCount: DataTypes.INTEGER,
+			createdAt: DataTypes.DATE,
+			updatedAt: DataTypes.DATE,
+		},
+		{ sequelize, modelName: "Tally" }
+	);
+
+	TallyRules.init(
+		{
+			guildId: {
+				type: DataTypes.STRING,
+				allowNull: false,
+			},
+			rules: DataTypes.STRING,
+			createdAt: DataTypes.DATE,
+			updatedAt: DataTypes.DATE,
+		},
+		{ sequelize, tableName: "TallyRules" }
 	);
 }
 
