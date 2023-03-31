@@ -1,8 +1,9 @@
 import { AudioPlayerStatus } from "@discordjs/voice";
-import { ChatInputCommandInteraction, Client, PermissionFlagsBits, SlashCommandBuilder } from "discord.js";
+import { AutocompleteInteraction, ChatInputCommandInteraction, Client, PermissionFlagsBits, SlashCommandBuilder } from "discord.js";
 import { getPlayer } from "../managers/Player.js";
+import { Command } from "../types/Command.js";
 
-const run = async (client: Client, interaction: ChatInputCommandInteraction): Promise<void> => {
+export async function run(client: Client, interaction: ChatInputCommandInteraction): Promise<void> {
 	if (interaction.guild == null) {
 		await interaction.reply({ content: "Please run this command in a guild.", ephemeral: true });
 		return;
@@ -18,26 +19,19 @@ const run = async (client: Client, interaction: ChatInputCommandInteraction): Pr
 			getPlayer(interaction.guild?.id)?.state.status == AudioPlayerStatus.Paused ? "Paused" : "Unpaused"
 		} the player, please run pause again to unpause it.`,
 	});
-};
+}
 
-const name = "pause";
-const enabled = true;
-const guildOnly = true;
-const description = "(Un)Pause the play command.";
-const defaultPermission = PermissionFlagsBits.UseApplicationCommands;
+export function autocomplete(client: Client, interaction: AutocompleteInteraction): void {
+	return;
+}
 const options = new SlashCommandBuilder()
-	.setName(name)
-	.setDescription(description)
-	.setDMPermission(!guildOnly)
-	.setDefaultMemberPermissions(defaultPermission);
+	.setName("pause")
+	.setDescription("(Un)Pause the play command.")
+	.setDMPermission(false)
+	.setDefaultMemberPermissions(PermissionFlagsBits.UseApplicationCommands);
 
-const config = {
-	name,
-	enabled,
-	guildOnly,
-	description,
-	defaultPermission,
+export const config = {
+	enabled: true,
+
 	options,
-};
-
-export { run, config };
+} satisfies Command["config"];

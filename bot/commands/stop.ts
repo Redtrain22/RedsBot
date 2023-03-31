@@ -1,8 +1,9 @@
-import { Client, ChatInputCommandInteraction, PermissionFlagsBits, SlashCommandBuilder } from "discord.js";
+import { Client, ChatInputCommandInteraction, PermissionFlagsBits, SlashCommandBuilder, AutocompleteInteraction } from "discord.js";
 import * as playerManager from "../managers/Player.js";
 import * as queueManager from "../managers/Queue.js";
+import { Command } from "../types/Command.js";
 
-async function run(client: Client, interaction: ChatInputCommandInteraction): Promise<void> {
+export async function run(client: Client, interaction: ChatInputCommandInteraction): Promise<void> {
 	if (interaction.guild == null) {
 		await interaction.reply({ content: "Please run this command inside a guild." });
 		return;
@@ -13,24 +14,17 @@ async function run(client: Client, interaction: ChatInputCommandInteraction): Pr
 	await interaction.reply({ content: "Left the channel and cleared the queue." });
 }
 
-const name = "stop";
-const enabled = true;
-const guildOnly = true;
-const description = "Stops the bot from playing music AND clears the queue.";
-const defaultPermission = PermissionFlagsBits.UseApplicationCommands;
+export function autocomplete(client: Client, interaction: AutocompleteInteraction): void {
+	return;
+}
+
 const options = new SlashCommandBuilder()
-	.setName(name)
-	.setDescription(description)
-	.setDMPermission(!guildOnly)
-	.setDefaultMemberPermissions(defaultPermission);
+	.setName("stop")
+	.setDescription("Stops the bot from playing music AND clears the queue.")
+	.setDMPermission(false)
+	.setDefaultMemberPermissions(PermissionFlagsBits.UseApplicationCommands);
 
-const config = {
-	name,
-	enabled,
-	guildOnly,
-	description,
-	defaultPermission,
+export const config = {
+	enabled: true,
 	options,
-};
-
-export { run, config };
+} satisfies Command["config"];

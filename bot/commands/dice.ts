@@ -1,6 +1,7 @@
-import { ChatInputCommandInteraction, Client, SlashCommandBuilder, PermissionFlagsBits } from "discord.js";
+import { ChatInputCommandInteraction, Client, SlashCommandBuilder, PermissionFlagsBits, AutocompleteInteraction } from "discord.js";
+import { Command } from "../types/Command.js";
 
-async function run(client: Client, interaction: ChatInputCommandInteraction): Promise<void> {
+export async function run(client: Client, interaction: ChatInputCommandInteraction): Promise<void> {
 	const sides = interaction.options.getInteger("sides", true);
 	let amount = interaction.options.getInteger("amount") || 1;
 	const advantage = interaction.options.getBoolean("advantage") || false;
@@ -56,28 +57,22 @@ async function run(client: Client, interaction: ChatInputCommandInteraction): Pr
 	});
 }
 
-const name = "dice";
-const enabled = true;
-const guildOnly = false;
-const description = "Roll a die or roll several dice.";
-const defaultPermission = PermissionFlagsBits.UseApplicationCommands;
+export function autocomplete(client: Client, interaction: AutocompleteInteraction): void {
+	return;
+}
+
 const options = new SlashCommandBuilder()
-	.setName(name)
-	.setDescription(description)
+	.setName("dice")
+	.setDescription("Roll a die or roll several dice.")
 	.addIntegerOption((option) => option.setName("sides").setDescription("Number of sides the di(c)e will have.").setRequired(true))
 	.addIntegerOption((option) => option.setName("amount").setDescription("The amount of di(c)e to roll.").setRequired(false))
 	.addIntegerOption((option) => option.setName("additive").setDescription("A number to add to the roll").setRequired(false))
 	.addBooleanOption((option) => option.setName("advantage").setDescription("Whether the roll has advantage or not.").setRequired(false))
 	.addBooleanOption((option) => option.setName("disadvantage").setDescription("Whether the roll has disadvantage or not.").setRequired(false))
-	.setDefaultMemberPermissions(defaultPermission);
+	.setDMPermission(true)
+	.setDefaultMemberPermissions(PermissionFlagsBits.UseApplicationCommands);
 
-const config = {
-	name,
-	enabled,
-	guildOnly,
-	description,
-	defaultPermission,
+export const config = {
+	enabled: true,
 	options,
-};
-
-export { run, config };
+} satisfies Command["config"];

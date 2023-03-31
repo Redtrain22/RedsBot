@@ -1,6 +1,16 @@
-import { ChatInputCommandInteraction, Client, Collection, Message, PermissionFlagsBits, SlashCommandBuilder, TextChannel } from "discord.js";
+import {
+	AutocompleteInteraction,
+	ChatInputCommandInteraction,
+	Client,
+	Collection,
+	Message,
+	PermissionFlagsBits,
+	SlashCommandBuilder,
+	TextChannel,
+} from "discord.js";
+import { Command } from "../types/Command.js";
 
-async function run(client: Client, interaction: ChatInputCommandInteraction): Promise<void> {
+export async function run(client: Client, interaction: ChatInputCommandInteraction): Promise<void> {
 	await interaction.deferReply();
 	const numMessges = interaction.options.getInteger("amount", true) + 1;
 	const messages = await interaction.channel?.messages.fetch({ limit: numMessges, cache: true });
@@ -39,25 +49,18 @@ async function run(client: Client, interaction: ChatInputCommandInteraction): Pr
 	return;
 }
 
-const name = "purge";
-const enabled = true;
-const guildOnly = true;
-const description = "Purge X number of messages from the channel";
-const defaultPermission = PermissionFlagsBits.KickMembers | PermissionFlagsBits.BanMembers;
+export function autocomplete(client: Client, interaction: AutocompleteInteraction): void {
+	return;
+}
+
 const options = new SlashCommandBuilder()
-	.setName(name)
-	.setDescription(description)
+	.setName("purge")
+	.setDescription("Purge X number of messages from the channel")
 	.addIntegerOption((option) => option.setName("amount").setDescription("Number of messages to purge").setRequired(true))
-	.setDMPermission(!guildOnly)
-	.setDefaultMemberPermissions(defaultPermission);
+	.setDMPermission(false)
+	.setDefaultMemberPermissions(PermissionFlagsBits.KickMembers | PermissionFlagsBits.BanMembers);
 
-const config = {
-	name,
-	enabled,
-	guildOnly,
-	description,
-	defaultPermission,
+export const config = {
+	enabled: true,
 	options,
-};
-
-export { run, config };
+} satisfies Command["config"];

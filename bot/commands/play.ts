@@ -7,8 +7,17 @@ import { YTSearcher } from "ytsearcher";
 import { getConfig } from "../managers/Config.js";
 const youtubeToken = getConfig().youtubeToken;
 import { getVoiceConnection, joinVoiceChannel, VoiceConnectionStatus, createAudioResource, StreamType, entersState } from "@discordjs/voice";
-import { ChannelType, ChatInputCommandInteraction, Client, GuildMember, PermissionFlagsBits, SlashCommandBuilder } from "discord.js";
+import {
+	AutocompleteInteraction,
+	ChannelType,
+	ChatInputCommandInteraction,
+	Client,
+	GuildMember,
+	PermissionFlagsBits,
+	SlashCommandBuilder,
+} from "discord.js";
 import { PlayerMetadata } from "../types/PlayerMetadata.js";
+import { Command } from "../types/Command.js";
 
 const regexYT = new RegExp("(^(https?\\:\\/\\/)?(www\\.youtube\\.com|youtu\\.be)\\/(watch\\?v=.{11}|.{11})$)|(^.{11}$)");
 const ytSearcher = new YTSearcher(youtubeToken);
@@ -73,7 +82,7 @@ async function searchSong(query: string): Promise<string | undefined> {
 	return results.currentPage?.first()?.url;
 }
 
-async function run(client: Client, interaction: ChatInputCommandInteraction): Promise<void> {
+export async function run(client: Client, interaction: ChatInputCommandInteraction): Promise<void> {
 	await interaction.deferReply();
 
 	if (interaction.guild == null) {
@@ -160,25 +169,18 @@ async function run(client: Client, interaction: ChatInputCommandInteraction): Pr
 	}
 }
 
-const name = "play";
-const enabled = true;
-const guildOnly = true;
-const description = "Play a song in the bot.";
-const defaultPermission = PermissionFlagsBits.UseApplicationCommands;
+export function autocomplete(client: Client, interaction: AutocompleteInteraction): void {
+	return;
+}
 const options = new SlashCommandBuilder()
-	.setName(name)
-	.setDescription(description)
+	.setName("play")
+	.setDescription("Play a song in the bot.")
 	.addStringOption((option) => option.setName("query").setDescription("Youtube link, or something to search Youtube for.").setRequired(true))
-	.setDMPermission(!guildOnly)
-	.setDefaultMemberPermissions(defaultPermission);
+	.setDMPermission(false)
+	.setDefaultMemberPermissions(PermissionFlagsBits.UseApplicationCommands);
 
-const config = {
-	name,
-	enabled,
-	description,
-	guildOnly,
+export const config = {
+	enabled: true,
+
 	options,
-	defaultPermission,
-};
-
-export { run, config };
+} satisfies Command["config"];

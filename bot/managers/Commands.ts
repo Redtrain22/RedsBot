@@ -19,8 +19,8 @@ export async function init(): Promise<void> {
 
 		const command: Command = await import(`../commands/${fileName}`);
 
-		log(`Loading command ${command.config.name.toLowerCase()}`);
-		commands.set(command.config.name.toLowerCase(), command);
+		log(`Loading command ${command.config.options.name.toLowerCase()}`);
+		commands.set(command.config.options.name.toLowerCase(), command);
 	}
 }
 
@@ -98,7 +98,7 @@ function generateSlashCommands() {
 	for (const [, command] of commands) {
 		if (!command.config.enabled) continue;
 		// We're only going to register commands that don't require a guild globally.
-		if (command.config.guildOnly) continue; // We're only generating global commands here.
+		if (command.config.options.dm_permission) continue; // We're only generating global commands here.
 		// if (command.help.defaultPermission == PermissionFlagsBits.UseApplicationCommands) {
 		globalCommands.push(command.config.options.toJSON());
 		// }
@@ -108,7 +108,7 @@ function generateSlashCommands() {
 	for (const [, command] of commands) {
 		if (!command.config.enabled) continue;
 		// We're only going to register commands that don't require a guild globally.
-		if (!command.config.guildOnly) continue; // Only generate guild commands here.
+		if (command.config.options.dm_permission) continue; // Only generate guild commands here.
 		// if (command.help.level == "User") {
 		guildCommands.push(command.config.options.toJSON());
 		// }
@@ -220,8 +220,12 @@ function generateOverrides(client: Client): Collection<string, ApplicationComman
 	for (const [, command] of commands) {
 		if (!command.config.enabled) continue;
 
-		// We can skip over global commands, which ARE NOT guildOnly AND User level.
-		if (command.config.defaultPermission == PermissionFlagsBits.UseApplicationCommands && !command.config.guildOnly) continue;
+		// Handle cases where it can't compare.
+		if (!command.config.options.default_member_permissions) continue;
+		if (typeof command.config.options.default_member_permissions == "string") continue;
+		// We can skip over global commands, which ARE DM only commands AND User level.
+		if (command.config.options.default_member_permissions == PermissionFlagsBits.UseApplicationCommands && command.config.options.dm_permission)
+			continue;
 
 		client.guilds.cache.forEach((guild) => {
 			const guildId = guild.id;

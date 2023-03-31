@@ -1,7 +1,7 @@
 import { getCommands } from "../managers/Commands.js";
 const commands = getCommands();
 import log, { error, LogType } from "../managers/Logger.js";
-import { ChatInputCommandInteraction, Client, Interaction, InteractionType } from "discord.js";
+import { AutocompleteInteraction, ChatInputCommandInteraction, Client, Interaction, InteractionType } from "discord.js";
 import { Statistic } from "../managers/Database.js";
 
 const once = false;
@@ -26,7 +26,10 @@ const run = async (client: Client, interaction: Interaction): Promise<void> => {
 		case InteractionType.ApplicationCommand:
 			if (!interaction.isChatInputCommand()) return;
 			await handleCommand(client, interaction);
+			break;
 
+		case InteractionType.ApplicationCommandAutocomplete:
+			await handleAutocomplete(client, interaction);
 			break;
 	}
 };
@@ -44,7 +47,7 @@ async function handleCommand(client: Client, interaction: ChatInputCommandIntera
 			return;
 		}
 
-		if (cmd.config.guildOnly && !interaction.guild) {
+		if (!cmd.config.options.dm_permission && !interaction.guild) {
 			await interaction.reply({
 				content: `Sorry, but the ${interaction.commandName} command can only be run inside a guild. Please run this in a Discord server`,
 			});
@@ -78,6 +81,13 @@ async function handleCommand(client: Client, interaction: ChatInputCommandIntera
 		}
 		error(err);
 	}
+}
+
+async function handleAutocomplete(client: Client, interaction: AutocompleteInteraction) {
+	const cmd = commands.get(interaction.commandName);
+	if (!cmd) return;
+
+	await cmd.autocomplete(client, interaction);
 }
 
 export { once, name, run };

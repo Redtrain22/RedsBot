@@ -1,6 +1,15 @@
-import { Client, Message, EmbedBuilder, SlashCommandBuilder, PermissionFlagsBits, ChatInputCommandInteraction } from "discord.js";
+import {
+	Client,
+	Message,
+	EmbedBuilder,
+	SlashCommandBuilder,
+	PermissionFlagsBits,
+	ChatInputCommandInteraction,
+	AutocompleteInteraction,
+} from "discord.js";
+import { Command } from "../types/Command.js";
 
-async function run(client: Client, interaction: ChatInputCommandInteraction): Promise<void> {
+export async function run(client: Client, interaction: ChatInputCommandInteraction): Promise<void> {
 	function msToTime(ms: number) {
 		const days = Math.floor(ms / 86400000); // 24*60*60*1000
 		const daysms = ms % 86400000; // 24*60*60*1000
@@ -32,24 +41,16 @@ async function run(client: Client, interaction: ChatInputCommandInteraction): Pr
 	await interaction.editReply({ embeds: [pong] });
 }
 
-const name = "ping";
-const enabled = true;
-const guildOnly = true;
-const description = "Ping... Pong!";
-const defaultPermission = PermissionFlagsBits.UseApplicationCommands;
+export function autocomplete(client: Client, interaction: AutocompleteInteraction): void {
+	return;
+}
 const options = new SlashCommandBuilder()
-	.setName(name)
-	.setDescription(description)
-	.setDMPermission(!guildOnly)
-	.setDefaultMemberPermissions(defaultPermission);
+	.setName("ping")
+	.setDescription("Ping... Pong!")
+	.setDMPermission(true)
+	.setDefaultMemberPermissions(PermissionFlagsBits.UseApplicationCommands);
 
-const config = {
-	name,
-	enabled,
-	guildOnly,
-	description,
-	defaultPermission,
+export const config = {
+	enabled: true,
 	options,
-};
-
-export { run, config };
+} satisfies Command["config"];

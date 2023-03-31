@@ -1,7 +1,8 @@
-import { Client, ChatInputCommandInteraction, PermissionFlagsBits, SlashCommandBuilder } from "discord.js";
+import { Client, ChatInputCommandInteraction, PermissionFlagsBits, SlashCommandBuilder, AutocompleteInteraction } from "discord.js";
 import * as playerManager from "../managers/Player.js";
+import { Command } from "../types/Command.js";
 
-async function run(client: Client, interaction: ChatInputCommandInteraction): Promise<void> {
+export async function run(client: Client, interaction: ChatInputCommandInteraction): Promise<void> {
 	const volume = interaction.options.getInteger("volume");
 
 	if (interaction.guild == null) {
@@ -19,25 +20,18 @@ async function run(client: Client, interaction: ChatInputCommandInteraction): Pr
 	}
 }
 
-const name = "volume";
-const enabled = true;
-const guildOnly = true;
-const description = "Shows or edits the current volume.";
-const defaultPermission = PermissionFlagsBits.UseApplicationCommands;
+export function autocomplete(client: Client, interaction: AutocompleteInteraction): void {
+	return;
+}
+
 const options = new SlashCommandBuilder()
-	.setName(name)
-	.setDescription(description)
+	.setName("volume")
+	.setDescription("Shows or edits the current volume.")
 	.addIntegerOption((option) => option.setName("volume").setDescription("The volume expressed as a percentage").setRequired(false))
-	.setDMPermission(!guildOnly)
-	.setDefaultMemberPermissions(defaultPermission);
+	.setDMPermission(false)
+	.setDefaultMemberPermissions(PermissionFlagsBits.UseApplicationCommands);
 
-const config = {
-	name,
-	enabled,
-	guildOnly,
-	description,
-	defaultPermission,
+export const config = {
+	enabled: true,
 	options,
-};
-
-export { run, config };
+} satisfies Command["config"];

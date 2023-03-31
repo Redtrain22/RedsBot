@@ -1,7 +1,8 @@
-import { EmbedBuilder, Client, ChatInputCommandInteraction, SlashCommandBuilder, PermissionFlagsBits } from "discord.js";
+import { EmbedBuilder, Client, ChatInputCommandInteraction, SlashCommandBuilder, PermissionFlagsBits, AutocompleteInteraction } from "discord.js";
 import * as queueManager from "../managers/Queue.js";
+import { Command } from "../types/Command.js";
 
-async function run(client: Client, interaction: ChatInputCommandInteraction): Promise<void> {
+export async function run(client: Client, interaction: ChatInputCommandInteraction): Promise<void> {
 	if (interaction.guild == null) {
 		await interaction.reply({ content: "Please run this command from a guild." });
 		return;
@@ -51,25 +52,17 @@ async function run(client: Client, interaction: ChatInputCommandInteraction): Pr
 	await interaction.reply({ embeds: [queue] });
 }
 
-const name = "queue";
-const enabled = true;
-const guildOnly = true;
-const description = "Shows the music queue.";
-const defaultPermission = PermissionFlagsBits.UseApplicationCommands;
+export function autocomplete(client: Client, interaction: AutocompleteInteraction): void {
+	return;
+}
 const options = new SlashCommandBuilder()
-	.setName(name)
-	.setDescription(description)
+	.setName("queue")
+	.setDescription("Shows the music queue.")
 	.addIntegerOption((option) => option.setName("page").setDescription("A page number to browse.").setRequired(false))
-	.setDMPermission(!guildOnly)
-	.setDefaultMemberPermissions(defaultPermission);
+	.setDMPermission(false)
+	.setDefaultMemberPermissions(PermissionFlagsBits.UseApplicationCommands);
 
-const config = {
-	name,
-	enabled,
-	guildOnly,
-	description,
-	defaultPermission,
+export const config = {
+	enabled: true,
 	options,
-};
-
-export { run, config };
+} satisfies Command["config"];

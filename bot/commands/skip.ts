@@ -1,8 +1,9 @@
 import * as queueManager from "../managers/Queue.js";
 import * as playerManager from "../managers/Player.js";
-import { Client, ChatInputCommandInteraction, SlashCommandBuilder, PermissionFlagsBits } from "discord.js";
+import { Client, ChatInputCommandInteraction, SlashCommandBuilder, PermissionFlagsBits, AutocompleteInteraction } from "discord.js";
+import { Command } from "../types/Command.js";
 
-async function run(client: Client, interaction: ChatInputCommandInteraction): Promise<void> {
+export async function run(client: Client, interaction: ChatInputCommandInteraction): Promise<void> {
 	const songNumber = interaction.options.getInteger("song");
 	if (interaction.guild == null) {
 		await interaction.reply({ content: "Please run this command from a guild." });
@@ -22,25 +23,18 @@ async function run(client: Client, interaction: ChatInputCommandInteraction): Pr
 	}
 }
 
-const name = "skip";
-const enabled = true;
-const guildOnly = true;
-const description = "Skip the current song, or a song in the queue.";
-const defaultPermission = PermissionFlagsBits.UseApplicationCommands;
+export function autocomplete(client: Client, interaction: AutocompleteInteraction): void {
+	return;
+}
+
 const options = new SlashCommandBuilder()
-	.setName(name)
-	.setDescription(description)
+	.setName("skip")
+	.setDescription("Skip the current song, or a song in the queue.")
 	.addIntegerOption((option) => option.setName("song").setDescription("Skip a song in queue.").setRequired(false))
-	.setDMPermission(!guildOnly)
-	.setDefaultMemberPermissions(defaultPermission);
+	.setDMPermission(false)
+	.setDefaultMemberPermissions(PermissionFlagsBits.UseApplicationCommands);
 
-const config = {
-	name,
-	enabled,
-	guildOnly,
-	description,
-	defaultPermission,
+export const config = {
+	enabled: true,
 	options,
-};
-
-export { run, config };
+} satisfies Command["config"];
