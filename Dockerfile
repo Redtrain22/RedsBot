@@ -1,4 +1,4 @@
-FROM node:lts-alpine3.17 AS stage
+FROM node:current-alpine AS stage
 
 USER root
 RUN apk add --upgrade autoconf \
@@ -13,7 +13,7 @@ WORKDIR /tmp/RedsBot
 RUN npm install
 
 
-FROM node:lts-alpine3.17
+FROM node:current-alpine as runtime
 WORKDIR /bot
 COPY --from=stage /tmp/RedsBot/ ./
 CMD ["npm run start"]
