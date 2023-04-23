@@ -1,7 +1,7 @@
 import { Dialect } from "sequelize";
 
 export const Dialects = ["mysql", "postgres", "sqlite", "mariadb", "mssql", "db2", "snowflake", "oracle"] as const;
-export function isValidDialect(dialect: string): dialect is Dialect {
+export function isValidDialect(dialect: string | undefined): dialect is Dialect {
 	return Dialects.includes(dialect as Dialect);
 }
 

@@ -28,26 +28,83 @@ let userConfig: Config;
 
 /**
  * Initalize the config.
+ *
+ * @summary
+ * This function will initialize the config using both the file and environment variables.
+ *
+ * It will first load the data from the file using the BOT_CONFIG_PATH environment variable.
+ *
+ * The config manager will use any environment variables to REPLACE any values in the written file
+ * EXCEPT the IDs which it will merge the two lists.
  */
 export function init(): void {
-	if (existsSync("./data/config.json")) {
-		try {
-			userConfig = JSON.parse(readFileSync("./data/config.json").toString());
-			log("Config loaded.");
+	try {
+		const config = getConfigFromDisk(process.env.BOT_CONFIG_PATH);
+		if (config) userConfig = config;
+		processEnvironmentVariables();
 
-			checkFields(); // Check for fields that aren't filled.
-			appendConfig(); // Check for config update and ONLY APPEND TO IT.
-		} catch (err) {
-			log("Config error, commonly a formatting issue.");
-			error(err);
-		}
-	} else {
-		log("Config not found! Time to make one. Please fill out the fields.");
+		log("Config loaded.");
+
+		checkFields(); // Check for fields that aren't filled.
+		appendConfig(); // Check for config update and ONLY APPEND TO IT.
+	} catch (err) {
+		log("Config error, commonly a formatting issue.");
+		error(err);
+	}
+
+	if (!userConfig) {
+		log("Config file not found! Time to make one. Please fill out the fields.");
 		writeFileSync("./data/config.json", JSON.stringify(configTemplate, null, 2));
-		log("Shutting the bot down as no discordToken exists yet.");
 		process.exitCode = 1;
 		process.exit();
 	}
+}
+
+function getConfigFromDisk(path: string | undefined = "./data/config.json"): Config | null {
+	const config = JSON.parse(readFileSync(path).toString());
+
+	return config;
+}
+
+/**
+ * BOT_CONFIG_PATH - Path to the config file to be parsed by the bot.
+ *
+ * BOT_OWNER_IDS - Comma separated list of userIds to give owner perms to.
+ *
+ * BOT_DEV_IDS - Comma separated list of userIds to give dev perms to.
+ *
+ * BOT_ADMIN_IDS - Comma separated list of userIds to give admin perms to.
+ *
+ * BOT_DISCORD_TOKEN - Discord token that the bot uses to login.
+ *
+ * BOT_DISCORD_TOKEN - YouTube token used to query YouTube.
+ *
+ * BOT_DATBASE_TYPE - Type of database that's suppored by Sequelize.
+ *
+ * BOT_DATABASE_HOST - Host of the database.
+ *
+ * BOT_DATABASE_NAME - Name of the database to connect to.
+ *
+ * BOT_DATABASE_USER - User used to connect to the database.
+ *
+ * BOT_DATABASE_PASSWORD - Password for the user.
+ *
+ * BOT_DATABASE_LOGGING - Whether or not to enable loggging of database transactions.
+ */
+function processEnvironmentVariables(): void {
+	userConfig.ownerIds.push(...(process.env.BOT_OWNER_IDS?.split(",") ?? userConfig.ownerIds));
+	userConfig.devIds.push(...(process.env.BOT_DEV_IDS?.split(",") ?? userConfig.devIds));
+	userConfig.adminIds.push(...(process.env.BOT_ADMIN_IDS?.split(",") ?? userConfig.adminIds));
+	userConfig.discordToken = process.env.BOT_DISCORD_TOKEN ?? userConfig.discordToken;
+	userConfig.youtubeToken = process.env.BOT_DISCORD_TOKEN ?? userConfig.youtubeToken;
+	if (!process.env.BOT_DATABASE_TYPE && !isValidDialect(userConfig.databaseType)) throw "Database type is not a Valid Dialet";
+	if (isValidDialect(process.env.BOT_DATABASE_TYPE)) userConfig.databaseType = process.env.BOT_DATABASE_TYPE ?? userConfig.databaseType;
+	userConfig.databaseHost = process.env.BOT_DATABASE_HOST ?? userConfig.databaseHost;
+	userConfig.databasePort = parseInt(process.env.BOT_DATABASE_PORT ?? `${userConfig.databasePort}`);
+	userConfig.databaseName = process.env.BOT_DATABASE_NAME ?? userConfig.databaseName;
+	userConfig.databaseUser = process.env.BOT_DATABASE_USER ?? userConfig.databaseUser;
+	userConfig.databasePassword = process.env.BOT_DATABASE_PASSWORD ?? userConfig.databasePassword;
+	userConfig.databaseLogging = Boolean(process.env.BOT_DATABASE_LOGGING) ?? userConfig.databaseLogging;
 }
 
 /**
