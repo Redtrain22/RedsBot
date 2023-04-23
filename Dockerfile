@@ -1,4 +1,4 @@
-FROM node:current-alpine AS stage
+FROM node:lts-alpine AS stage
 
 USER root
 RUN apk add --upgrade autoconf \
@@ -13,7 +13,9 @@ WORKDIR /tmp/RedsBot
 RUN npm install
 
 
-FROM node:current-alpine as runtime
+FROM node:lts-alpine as runtime
+RUN apk add --upgrade python3 \
+	ffmpeg
 WORKDIR /bot
 COPY --from=stage /tmp/RedsBot/ ./
-ENTRYPOINT ["npm run start"]
+CMD ["npm", "run", "start"]
