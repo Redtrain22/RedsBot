@@ -51,16 +51,14 @@ export function init(): void {
 		log("Config error, commonly a formatting issue.");
 		error(err);
 	}
-
-	if (!userConfig) {
-		log("Config file not found! Time to make one. Please fill out the fields.");
-		writeFileSync("./data/config.json", JSON.stringify(configTemplate, null, 2));
-		process.exitCode = 1;
-		process.exit();
-	}
 }
 
 function getConfigFromDisk(path: string | undefined = "./data/config.json"): Config | null {
+	if (!existsSync(path)) {
+		log("Config file not found! Time to make one. Please fill out the fields.");
+		writeFileSync("./data/config.json", JSON.stringify(configTemplate, null, 2));
+	}
+
 	const config = JSON.parse(readFileSync(path).toString());
 
 	return config;
