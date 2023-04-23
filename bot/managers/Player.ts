@@ -67,7 +67,7 @@ export function play(interaction: CommandInteraction, connection: VoiceConnectio
 				}
 				connection.destroy();
 			}
-		}, 10_000);
+		}, 30_000);
 	} else {
 		audioPlayer?.play(queueManager.getCurrentSong(interaction.guild.id) as AudioResource); // We've check that the current song isn't undefined above.
 		connection.subscribe(audioPlayer);
