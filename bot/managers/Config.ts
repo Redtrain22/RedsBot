@@ -96,7 +96,7 @@ function processEnvironmentVariables(): void {
 	userConfig.devIds.push(...(process.env.BOT_DEV_IDS?.split(",") ?? userConfig.devIds));
 	userConfig.adminIds.push(...(process.env.BOT_ADMIN_IDS?.split(",") ?? userConfig.adminIds));
 	userConfig.discordToken = process.env.BOT_DISCORD_TOKEN ?? userConfig.discordToken;
-	userConfig.youtubeToken = process.env.BOT_DISCORD_TOKEN ?? userConfig.youtubeToken;
+	userConfig.youtubeToken = process.env.BOT_YOUTUBE_TOKEN ?? userConfig.youtubeToken;
 	if (!process.env.BOT_DATABASE_TYPE && !isValidDialect(userConfig.databaseType)) throw "Database type is not a Valid Dialet";
 	if (isValidDialect(process.env.BOT_DATABASE_TYPE)) userConfig.databaseType = process.env.BOT_DATABASE_TYPE ?? userConfig.databaseType;
 	userConfig.databaseHost = process.env.BOT_DATABASE_HOST ?? userConfig.databaseHost;
