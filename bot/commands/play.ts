@@ -163,7 +163,7 @@ export async function run(client: Client, interaction: ChatInputCommandInteracti
 				// Seems to be reconnecting to a new channel - ignore disconnect
 			} catch (error) {
 				// Seems to be a real disconnect which SHOULDN'T be recovered from
-				connection.destroy();
+				if (connection.state.status != VoiceConnectionStatus.Destroyed) connection.destroy();
 			}
 		});
 	}
