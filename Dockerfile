@@ -16,4 +16,4 @@ RUN npm install
 FROM node:current-alpine as runtime
 WORKDIR /bot
 COPY --from=stage /tmp/RedsBot/ ./
-CMD ["npm run start"]
+ENTRYPOINT ["npm run start"]
