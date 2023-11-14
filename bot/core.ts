@@ -8,7 +8,7 @@ import * as eventManager from "./managers/Events.js";
 // const intents = new Intents(["GUILDS", "GUILD_MESSAGES", "GUILD_BANS", "GUILD_VOICE_STATES", "DIRECT_MESSAGES"]); // Client Intents
 const intents = [
 	GatewayIntentBits.Guilds,
-	GatewayIntentBits.GuildBans,
+	GatewayIntentBits.GuildModeration,
 	GatewayIntentBits.GuildVoiceStates,
 	GatewayIntentBits.GuildInvites,
 	GatewayIntentBits.DirectMessages,
