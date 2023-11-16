@@ -1,7 +1,7 @@
 import { Sequelize, DataTypes } from "sequelize";
 import { getConfig } from "./Config.js";
 const config = getConfig();
-import log, { error, LogType } from "./Logger.js";
+import logger from "./Logger.js";
 
 // Delcare our sequelize object here.
 let sequelize: Sequelize;
@@ -24,7 +24,7 @@ function createDB(): Sequelize {
 			// Where the sqlite3 database will sit.
 			storage: "./data/data.sqlite",
 
-			logging: config.databaseLogging ? (query: unknown) => log(query, LogType.Database) : false,
+			logging: config.databaseLogging ? (query: unknown) => logger.database(query) : false,
 
 			pool: {
 				// Max number of clients
@@ -52,7 +52,7 @@ function createDB(): Sequelize {
 
 		password: config.databasePassword,
 
-		logging: config.databaseLogging ? (query) => log(query, LogType.Database) : false,
+		logging: config.databaseLogging ? (query) => logger.database(query) : false,
 
 		pool: {
 			// Max number of clients
@@ -81,7 +81,7 @@ export async function init(): Promise<void> {
 		tableInit();
 		await sequelize.sync();
 	} catch (err) {
-		error(err);
+		logger.error(err);
 	}
 }
 
@@ -92,7 +92,7 @@ export async function destroy(): Promise<void> {
 	try {
 		await sequelize.close();
 	} catch (err) {
-		error(err);
+		logger.error(err);
 	}
 }
 

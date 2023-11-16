@@ -1,6 +1,6 @@
 import { Config, Dialects, isValidDialect } from "../types/Config.js";
 import { mkdirSync, readFileSync, existsSync, writeFileSync, renameSync } from "node:fs";
-import log, { error, warn } from "./Logger.js";
+import logger from "./Logger.js";
 
 // Make data directory here to make sure that we have a place to put the config file.
 if (!existsSync("./data")) {
@@ -43,19 +43,19 @@ export function init(): void {
 		if (config) userConfig = config;
 		processEnvironmentVariables();
 
-		log("Config loaded.");
+		logger.info("Config loaded.");
 
 		checkFields(); // Check for fields that aren't filled.
 		appendConfig(); // Check for config update and ONLY APPEND TO IT.
 	} catch (err) {
-		log("Config error, commonly a formatting issue.");
-		error(err);
+		logger.info("Config error, commonly a formatting issue.");
+		logger.error(err);
 	}
 }
 
 function getConfigFromDisk(path: string | undefined = "./data/config.json"): Config | null {
 	if (!existsSync(path)) {
-		log("Config file not found! Time to make one. Please fill out the fields.");
+		logger.info("Config file not found! Time to make one. Please fill out the fields.");
 		writeFileSync("./data/config.json", JSON.stringify(configTemplate, null, 2));
 	}
 
@@ -123,7 +123,7 @@ function appendConfig(): void {
 
 			// Check if field exists.
 			if (!userConfig[configField as keyof Config]) {
-				warn(`You're missing ${configField}, adding it to config. Please set the field!`);
+				logger.warn(`You're missing ${configField}, adding it to config. Please set the field!`);
 				userConfig[configField as keyof Config] = configTemplate[configField as keyof Config] as never; // Set the new field to the default value.
 			}
 		}
@@ -132,7 +132,7 @@ function appendConfig(): void {
 		userConfig["version"] = configTemplate["version"];
 
 		// Back up the file because we're not perfect.
-		log("Backing up the config before updating, you can find the old one at ./data/config.json.bak");
+		logger.info("Backing up the config before updating, you can find the old one at ./data/config.json.bak");
 		renameSync("./data/config.json", "./data/config.json.bak");
 		writeFileSync("./data/config.json", JSON.stringify(userConfig, null, 2));
 	}
@@ -149,7 +149,7 @@ function checkFields(): void {
 		if (configField == "databaseType") {
 			const dialect = userConfig[configField].toLowerCase();
 			if (!isValidDialect(dialect)) {
-				error(`Not a valid dialect. Your choices are ${Dialects.join(", ")}`);
+				logger.error(`Not a valid dialect. Your choices are ${Dialects.join(", ")}`);
 				continue;
 			}
 			userConfig[configField] = dialect;
@@ -169,7 +169,7 @@ function checkFields(): void {
 
 		// Check if config[configField] is there AND if the field is the default value.
 		if (userConfig[configField as keyof Config] && userConfig[configField as keyof Config] == configTemplate[configField as keyof Config]) {
-			warn(`You didn't set ${configField} in your config. Please set the field!`);
+			logger.warn(`You didn't set ${configField} in your config. Please set the field!`);
 		}
 	}
 }

@@ -2,7 +2,7 @@ import * as fs from "node:fs";
 import youtube from "youtube-dl-exec";
 import * as queueManager from "../managers/Queue.js";
 import * as playerManager from "../managers/Player.js";
-import { error } from "../managers/Logger.js";
+import logger from "../managers/Logger.js";
 import { YTSearcher } from "ytsearcher";
 import { getConfig } from "../managers/Config.js";
 const youtubeToken = getConfig().youtubeToken;
@@ -117,7 +117,7 @@ export async function run(client: Client, interaction: ChatInputCommandInteracti
 
 		queueManager.addSong(interaction.guild.id, song);
 	} catch (err) {
-		error(err);
+		logger.error(err);
 	}
 
 	if (getVoiceConnection(interaction.guild.id) == undefined) {

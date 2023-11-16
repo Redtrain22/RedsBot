@@ -2,7 +2,7 @@ import { Command } from "../types/Command.js";
 
 import { ApplicationCommandPermissions, ApplicationCommandPermissionType, Client, Collection, PermissionFlagsBits } from "discord.js";
 import fs from "node:fs";
-import log from "./Logger.js";
+import logger from "./Logger.js";
 import { getConfig } from "./Config.js";
 const config = getConfig();
 
@@ -19,7 +19,7 @@ export async function init(): Promise<void> {
 
 		const command: Command = await import(`../commands/${fileName}`);
 
-		log(`Loading command ${command.config.options.name.toLowerCase()}`);
+		logger.info(`Loading command ${command.config.options.name.toLowerCase()}`);
 		commands.set(command.config.options.name.toLowerCase(), command);
 	}
 }
@@ -28,7 +28,7 @@ export async function init(): Promise<void> {
  * Destroy the Command Manager.
  */
 export function destroy(): void {
-	log("Destroying Command Manager, commands won't work anymore.");
+	logger.info("Destroying Command Manager, commands won't work anymore.");
 
 	// commands.forEach((command) => {
 	// 	delete require.cache[require.resolve(`../commands/${command.help.name}`)];
@@ -42,10 +42,10 @@ export function destroy(): void {
  * @param commandName - The name of the command to reload.
  */
 export async function reloadCommand(commandName: string): Promise<void> {
-	log(`Unloading Command ${commandName}`);
+	logger.info(`Unloading Command ${commandName}`);
 	commands.delete(commandName);
 	// delete require.cache[require.resolve(`../commands/${commandName}`)];
-	log(`Loading Command ${commandName}`);
+	logger.info(`Loading Command ${commandName}`);
 
 	const command: Command = await import(`../commands/${commandName}`);
 
@@ -63,25 +63,25 @@ export async function registerSlashCommands(client: Client, scope = "global"): P
 	if (scope == "global") {
 		await client.application?.fetch();
 		await client.application?.commands.set(globalCommands);
-		log("Set Slash Commands.");
+		logger.info("Set Slash Commands.");
 		await setPermissions(client); // Set permissions globally.
 
 		client.guilds.cache.forEach(async (guild) => {
 			await guild.commands.set(guildCommands);
-			log(`Set Slash Commands in "${guild.name}" (${guild.id})`);
+			logger.info(`Set Slash Commands in "${guild.name}" (${guild.id})`);
 			await setPermissions(client, guild.id); // Set individual guild permissions.
 		});
 	} else if (scope == "guilds") {
 		client.guilds.cache.forEach(async (guild) => {
 			await guild.commands.set(guildCommands);
-			log(`Set Slash Commands in "${guild.name}" (${guild.id})`);
+			logger.info(`Set Slash Commands in "${guild.name}" (${guild.id})`);
 			await setPermissions(client, guild.id); // Set individual guild permissions.
 		});
 	} else {
 		const guild = await client.guilds.fetch(scope);
 
 		await guild.commands.set(guildCommands);
-		log(`Set Slash Commands in "${guild.name}" (${guild.id})`);
+		logger.info(`Set Slash Commands in "${guild.name}" (${guild.id})`);
 		await setPermissions(client, guild.id);
 	}
 }
@@ -127,11 +127,11 @@ export async function unregisterSlashCommands(client: Client, scope = "global"):
 
 	if (scope == "global") {
 		await client.application?.commands.set([]);
-		log("Unregistered slash commands globally, please register them again to have global commands.");
+		logger.info("Unregistered slash commands globally, please register them again to have global commands.");
 	} else {
 		const guild = client.guilds.cache.get(scope);
 		await guild?.commands.set([]);
-		log(`Unregistered slash commands in "${guild?.name}" (${guild?.id})`);
+		logger.info(`Unregistered slash commands in "${guild?.name}" (${guild?.id})`);
 	}
 }
 
@@ -157,7 +157,7 @@ async function setPermissions(client: Client, scope = "global", overrides = gene
 					token: config.discordToken,
 				});
 			}
-			log(`Set slash Command Permissions in guild "${guild?.name}" (${guild?.id})`);
+			logger.info(`Set slash Command Permissions in guild "${guild?.name}" (${guild?.id})`);
 		}
 	} else {
 		const guild = await client.guilds.fetch(scope);
@@ -174,7 +174,7 @@ async function setPermissions(client: Client, scope = "global", overrides = gene
 				token: config.discordToken,
 			});
 		});
-		log(`Set Slash Command Permissions in guild "${guild?.name}" (${guild?.id})`);
+		logger.info(`Set Slash Command Permissions in guild "${guild?.name}" (${guild?.id})`);
 	}
 }
 

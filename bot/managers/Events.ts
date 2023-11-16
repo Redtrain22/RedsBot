@@ -1,6 +1,6 @@
 import { Client, Collection } from "discord.js";
 import * as fs from "node:fs";
-import log from "../managers/Logger.js";
+import logger from "../managers/Logger.js";
 import { Event } from "../types/Event.js";
 
 const events = new Collection<string, Event>();
@@ -27,7 +27,7 @@ export async function init(client: Client): Promise<void> {
  * @param client - The client with the event manager to destroy.
  */
 export function destroy(client: Client): void {
-	log("Destroying Event Manager, Discord.JS Events will no longer register.");
+	logger.info("Destroying Event Manager, Discord.JS Events will no longer register.");
 
 	const eventNames = events.keys();
 	for (const eventName of eventNames) {
@@ -59,7 +59,7 @@ export function registerEvent(client: Client, eventName: string): void {
 	if (event == undefined) return;
 
 	client[event.once ? "once" : "on"](event.name, event.run.bind(null, client));
-	log(`Registered Event ${eventName}`);
+	logger.info(`Registered Event ${eventName}`);
 }
 
 /**
@@ -67,7 +67,7 @@ export function registerEvent(client: Client, eventName: string): void {
  * @param eventName The name of the event to unregister.
  */
 export function unregisterEvent(client: Client, eventName: string): void {
-	log(`Unregistering Event ${eventName}`);
+	logger.info(`Unregistering Event ${eventName}`);
 	client.removeAllListeners(eventName);
 	events.delete(eventName);
 	// Uncache the event so that it's not in memory anymore.

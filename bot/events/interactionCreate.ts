@@ -1,6 +1,6 @@
 import { getCommands } from "../managers/Commands.js";
 const commands = getCommands();
-import log, { error, LogType } from "../managers/Logger.js";
+import logger from "../managers/Logger.js";
 import { AutocompleteInteraction, ChatInputCommandInteraction, Client, Interaction, InteractionType } from "discord.js";
 import { Statistic } from "../managers/Database.js";
 
@@ -57,14 +57,10 @@ async function handleCommand(client: Client, interaction: ChatInputCommandIntera
 		await cmd.run(client, interaction);
 
 		if (!interaction.guild) {
-			log(
-				`"${interaction.member?.user.username}#${interaction.member?.user.discriminator}" ran command ${interaction.commandName} in DMs`,
-				LogType.CMD
-			);
+			logger.info(`"${interaction.member?.user.username}#${interaction.member?.user.discriminator}" ran command ${interaction.commandName} in DMs`);
 		} else {
-			log(
-				`"${interaction.member?.user.username}#${interaction.member?.user.discriminator}" ran command ${interaction.commandName} in guild "${interaction.guild?.name}" (${interaction.guild?.id})`,
-				LogType.CMD
+			logger.info(
+				`"${interaction.member?.user.username}#${interaction.member?.user.discriminator}" ran command ${interaction.commandName} in guild "${interaction.guild?.name}" (${interaction.guild?.id})`
 			);
 		}
 	} catch (err) {
@@ -79,7 +75,7 @@ async function handleCommand(client: Client, interaction: ChatInputCommandIntera
 				ephemeral: true,
 			});
 		}
-		error(err);
+		logger.error(err);
 	}
 }
 

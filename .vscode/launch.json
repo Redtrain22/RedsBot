@@ -6,9 +6,10 @@
 	"configurations": [
 		{
 			"name": "RedsBot",
-			"type": "node",
 			"request": "launch",
-			"runtimeArgs": ["--nolazy", "--loader=ts-node/esm"],
+			"type": "node",
+			"runtimeExecutable": "npm",
+			"runtimeArgs": ["run", "start:dev"],
 			"sourceMaps": true,
 			"cwd": "${workspaceRoot}",
 			"skipFiles": ["<node_internals>/**"],
@@ -18,9 +19,10 @@
 		},
 		{
 			"name": "RedsBot Profiler",
-			"type": "node",
 			"request": "launch",
-			"runtimeArgs": ["--nolazy", "--loader=ts-node/esm"],
+			"type": "node",
+			"runtimeExecutable": "npm",
+			"runtimeArgs": ["run", "start:dev"],
 			"sourceMaps": true,
 			"profileStartup": true,
 			"cwd": "${workspaceRoot}",

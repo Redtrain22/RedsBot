@@ -1,4 +1,5 @@
 import { Client, GatewayIntentBits, Partials } from "discord.js";
+import logger from "./managers/Logger.js";
 import * as configManager from "./managers/Config.js";
 import * as databaseManager from "./managers/Database.js";
 import * as commandManager from "./managers/Commands.js";
@@ -15,6 +16,20 @@ const intents = [
 ];
 const partials = [Partials.Channel];
 const client = new Client({ intents, partials }); // Client has to be declared out here so it's accessible to the reboot function.
+
+process.on("uncaughtException", async (err) => {
+	// log the exception
+	logger.fatal(err, "Uncaught Exception!");
+
+	await destroy();
+
+	// Exit after 10s if a safe shutdown hasn't finished.
+	setTimeout(() => {
+		process.exit(); // exit immediately and do not generate a core dump file
+		// TODO: Configure shutdown time from launch
+	}, 30000).unref();
+	process.exit(1);
+});
 
 /**
  * Initialize the bot.
