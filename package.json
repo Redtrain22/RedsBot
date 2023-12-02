@@ -30,7 +30,7 @@
 		"discord.js": "^14.14.1",
 		"pino": "^8.16.1",
 		"sequelize": "^6.35.0",
-		"sodium": "^3.0.2",
+		"sodium-native": "^4.0.4",
 		"sqlite3": "^5.1.6",
 		"tsx": "^4.6.2",
 		"typescript": "^5.2.2",
