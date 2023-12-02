@@ -8,8 +8,8 @@
 		"node": ">=18.5.0"
 	},
 	"scripts": {
-		"start": "npx ts-node index.ts",
-		"start:dev": "npx ts-node index.ts | npx pino-pretty",
+		"start": "npx tsx index.ts",
+		"start:dev": "npx tsx index.ts | npx pino-pretty",
 		"build": "tsc --build",
 		"docker-build": "docker buildx build -t git.redtrain.me/redtrain22/redsbot:latest --platform \"linux/amd64,linux/arm64\" .",
 		"test": "echo \"Error: no test specified\" && exit 1"
@@ -32,7 +32,7 @@
 		"sequelize": "^6.35.0",
 		"sodium": "^3.0.2",
 		"sqlite3": "^5.1.6",
-		"ts-node": "^10.9.1",
+		"tsx": "^4.6.2",
 		"typescript": "^5.2.2",
 		"youtube-dl-exec": "^2.4.17",
 		"ytsearcher": "^1.2.4"
