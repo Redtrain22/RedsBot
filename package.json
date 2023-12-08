@@ -10,8 +10,9 @@
 	"scripts": {
 		"start": "npx tsx index.ts",
 		"start:dev": "npx tsx index.ts | npx pino-pretty",
+		"start:prod": "node index.js",
 		"build": "tsc --build",
-		"docker-build": "docker buildx build -t git.redtrain.me/redtrain22/redsbot:latest --platform \"linux/amd64,linux/arm64\" .",
+		"build:docker": "docker buildx build -t git.redtrain.me/redtrain22/redsbot:latest --platform \"linux/amd64,linux/arm64\" .",
 		"test": "echo \"Error: no test specified\" && exit 1"
 	},
 	"repository": {
@@ -38,6 +39,7 @@
 		"ytsearcher": "^1.2.4"
 	},
 	"devDependencies": {
+		"@types/node": "^20.10.2",
 		"@types/validator": "^13.11.7",
 		"@typescript-eslint/eslint-plugin": "^6.13.1",
 		"@typescript-eslint/parser": "^6.13.1",
