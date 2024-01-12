@@ -1,4 +1,4 @@
-FROM node:20.10-alpine AS stage
+FROM node:20.11-alpine AS stage
 
 USER root
 RUN apk add --upgrade autoconf \
