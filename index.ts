@@ -6,6 +6,7 @@ if (Number(process.version.slice(1).split(".")[0]) < 20 && Number(process.versio
 
 import { existsSync, mkdirSync } from "node:fs";
 import { createInterface } from "node:readline";
+import logger from "./bot/managers/Logger.js";
 import * as bot from "./bot/core.js";
 
 const terminal = createInterface({
@@ -23,6 +24,22 @@ async function handleTerminal(input: string) {
 	const command = args.shift();
 
 	switch (command) {
+		case "help":
+			logger.info(`
+				The commands available to you are as follow
+
+				restart - Restarts the bot
+				reloadEvent [name] - Reload an event by name (Broken)
+				reloadEvents - Reload ALL events (Broken)
+				reloadCommand [name] - Reload a command by name (Broken)
+				reloadCommands - Reload ALL commands (Broken)
+				registerSlashCommands (guildId) - (Re)-register all slash commands. Optionally takes a guildId to target a specific guild.
+				unregisterSlashCommands (guildId) - Unregister all slash commands from discord. Optionally takes a guildId to target a specific guild.
+				stop/quit/destroy - Stop the process, will restart the container in prod.
+			
+			`);
+			break;
+
 		case "restart":
 			await bot.restart();
 			break;
