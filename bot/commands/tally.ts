@@ -22,7 +22,7 @@ export async function run(client: Client, interaction: ChatInputCommandInteracti
 			await handleRuleCreate(interaction);
 			break;
 
-		case "bulkCreate":
+		case "bulkcreate":
 			await handleRuleBulkCreate(interaction);
 			break;
 
@@ -89,11 +89,10 @@ async function handleRuleRemove(interaction: ChatInputCommandInteraction) {
 }
 
 async function handleRuleClear(interaction: ChatInputCommandInteraction) {
-	const ruleName = interaction.options.getString("name", true);
 	const guildRules = await TallyRules.findAll({ where: { guildId: interaction.guild?.id } });
-	const playerTallies = await Tally.findAll({ where: { guildId: interaction.guild?.id, ruleName } });
+	const playerTallies = await Tally.findAll({ where: { guildId: interaction.guild?.id } });
 
-	for (const rule of guildRules) await rule.removeRule(ruleName);
+	for (const ruleSet of guildRules) await ruleSet.destroy();
 	for (const player of playerTallies) await player.destroy();
 
 	await interaction.reply("Removed all rulesets.");
@@ -102,7 +101,7 @@ async function handleRuleClear(interaction: ChatInputCommandInteraction) {
 async function handleRuleList(interaction: ChatInputCommandInteraction) {
 	const guildRules = await TallyRules.findOne({ where: { guildId: interaction.guild?.id } });
 
-	await interaction.reply(`The active rules are as follows:\n${guildRules?.getRules().join(", ") ?? "None"}`);
+	await interaction.reply(`The active rules are as follows:\n${guildRules?.getRules().join("\n") ?? "None"}`);
 }
 
 async function handleTallyAdd(interaction: ChatInputCommandInteraction) {
@@ -183,7 +182,7 @@ const options = new SlashCommandBuilder()
 			)
 			.addSubcommand((subCommand) =>
 				subCommand
-					.setName("bulkCreate")
+					.setName("bulkcreate")
 					.setDescription("Add a rule to the tally counter")
 					.addStringOption((option) => option.setName("rules").setDescription("A list of rules separated by commas to add.").setRequired(true))
 			)
