@@ -26,6 +26,10 @@ export async function run(client: Client, interaction: ChatInputCommandInteracti
 			await handleRuleRemove(interaction);
 			break;
 
+		case "clear":
+			await handleRuleClear(interaction);
+			break;
+
 		case "list":
 			await handleRuleList(interaction);
 			break;
@@ -62,6 +66,17 @@ async function handleRuleRemove(interaction: ChatInputCommandInteraction) {
 	await interaction.reply(`Removed ${ruleName} to the ruleset.`);
 
 	for (const player of playerTallies) await player.destroy();
+}
+
+async function handleRuleClear(interaction: ChatInputCommandInteraction) {
+	const ruleName = interaction.options.getString("name", true);
+	const guildRules = await TallyRules.findAll({ where: { guildId: interaction.guild?.id } });
+	const playerTallies = await Tally.findAll({ where: { guildId: interaction.guild?.id, ruleName } });
+
+	for (const rule of guildRules) await rule.removeRule(ruleName);
+	for (const player of playerTallies) await player.destroy();
+
+	await interaction.reply("Removed all rulesets.");
 }
 
 async function handleRuleList(interaction: ChatInputCommandInteraction) {
@@ -153,6 +168,7 @@ const options = new SlashCommandBuilder()
 					.addStringOption((option) => option.setName("name").setDescription("Name of rule to remove.").setRequired(true).setAutocomplete(true))
 			)
 			.addSubcommand((subCommand) => subCommand.setName("list").setDescription("List the active rules."))
+			.addSubcommand((subCommand) => subCommand.setName("clear").setDescription("Clear the active rules."))
 	)
 	.addSubcommand((subCommand) =>
 		subCommand
