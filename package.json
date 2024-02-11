@@ -13,6 +13,7 @@
 		"start:prod": "node index.js",
 		"build": "tsc --build",
 		"build:docker": "docker buildx build -t git.redtrain.me/redtrain22/redsbot:latest --platform \"linux/amd64,linux/arm64\" .",
+		"build:docker-beta": "docker buildx build -t git.redtrain.me/redtrain22/redsbot:beta --platform \"linux/amd64,linux/arm64\" .",
 		"test": "echo \"Error: no test specified\" && exit 1"
 	},
 	"repository": {
