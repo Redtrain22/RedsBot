@@ -28,6 +28,7 @@ const logger = pino(
 	pino.destination({
 		minLength: 4096, // Buffer before writing
 		sync: false, // Asynchronous logging
+		dest: 1,
 	})
 );
 
