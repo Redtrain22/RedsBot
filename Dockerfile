@@ -31,4 +31,5 @@ WORKDIR /bot
 COPY --from=stage --chown=node:node /home/node/build/RedsBot/dist .
 COPY --from=stage --chown=node:node /home/node/build/RedsBot/node_modules ./node_modules
 COPY --from=stage --chown=node:node /home/node/build/RedsBot/package.json .
-CMD ["node", "index.js"]
+
+CMD ["node", "/bot/index.js"]
