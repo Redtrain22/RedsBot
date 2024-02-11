@@ -22,6 +22,10 @@ export async function run(client: Client, interaction: ChatInputCommandInteracti
 			await handleRuleCreate(interaction);
 			break;
 
+		case "bulkCreate":
+			await handleRuleBulkCreate(interaction);
+			break;
+
 		case "remove":
 			await handleRuleRemove(interaction);
 			break;
@@ -55,6 +59,22 @@ async function handleRuleCreate(interaction: ChatInputCommandInteraction) {
 	if (!firstRule) await guildRules.addRule(ruleName);
 
 	await interaction.reply(`Added ${ruleName} to the ruleset`);
+}
+async function handleRuleBulkCreate(interaction: ChatInputCommandInteraction) {
+	if (!interaction.guild) return;
+	const input = interaction.options.getString("rules", true);
+	const rules = input.split(",");
+
+	for (const rule of rules) {
+		const [guildRules, firstRule] = await TallyRules.findOrCreate({
+			where: { guildId: interaction.guild.id },
+			defaults: { guildId: interaction.guild.id, rules: `${rule}` },
+		});
+
+		if (!firstRule) await guildRules.addRule(rule);
+	}
+
+	await interaction.reply(`Added the following rules to the ruleset:\n${rules.join("\n")}`);
 }
 
 async function handleRuleRemove(interaction: ChatInputCommandInteraction) {
@@ -160,6 +180,12 @@ const options = new SlashCommandBuilder()
 					.setName("create")
 					.setDescription("Add a rule to the tally counter")
 					.addStringOption((option) => option.setName("name").setDescription("Name of rule to add.").setRequired(true))
+			)
+			.addSubcommand((subCommand) =>
+				subCommand
+					.setName("bulkCreate")
+					.setDescription("Add a rule to the tally counter")
+					.addStringOption((option) => option.setName("rules").setDescription("A list of rules separated by commas to add.").setRequired(true))
 			)
 			.addSubcommand((subCommand) =>
 				subCommand
