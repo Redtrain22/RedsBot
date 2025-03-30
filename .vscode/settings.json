@@ -7,5 +7,8 @@
 	"editor.bracketPairColorization.enabled": true,
 	"editor.detectIndentation": false,
 	"editor.guides.bracketPairs": "active",
-	"editor.defaultFormatter": "esbenp.prettier-vscode"
+	"editor.defaultFormatter": "esbenp.prettier-vscode",
+	"[dockerfile]": {
+		"editor.defaultFormatter": "ms-azuretools.vscode-docker"
+	}
 }

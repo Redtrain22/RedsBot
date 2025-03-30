@@ -26,7 +26,7 @@ const logger = pino(
 		redact,
 	},
 	pino.destination({
-		sync: false, // Asynchronous logging
+		sync: true,
 	})
 );
 

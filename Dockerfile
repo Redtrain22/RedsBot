@@ -1,7 +1,9 @@
-FROM node:20.11-alpine AS stage
+ARG DOCKER_IMAGE=docker.io/library/node:22.14-alpine
+
+FROM ${DOCKER_IMAGE} AS builder
 
 USER root
-RUN apk add --upgrade autoconf \
+RUN apk upgrade && apk add --no-cache --upgrade autoconf \
 	automake \
 	build-base \ 
 	git \
@@ -10,26 +12,28 @@ RUN apk add --upgrade autoconf \
 	libsodium
 
 WORKDIR /home/node/build/RedsBot
-COPY index.ts .
-COPY bot ./bot
+
 COPY package.json .
 COPY pnpm-lock.yaml .
 COPY tsconfig.json .
+COPY index.ts .
+COPY bot ./bot
 
 RUN npm install -g pnpm
 RUN pnpm install --frozen-lockfile -P
-RUN pnpm build
+RUN pnpm run build
 
 
-FROM node:lts-alpine as bot
-RUN apk add --upgrade python3 \
-	ffmpeg \
-	libsodium
+FROM ${DOCKER_IMAGE}
+RUN apk upgrade && apk add --no-cache --upgrade ffmpeg \
+	libsodium \
+	libc6-compat
 
 USER node
+
 WORKDIR /bot
-COPY --from=stage --chown=node:node /home/node/build/RedsBot/dist .
-COPY --from=stage --chown=node:node /home/node/build/RedsBot/node_modules ./node_modules
-COPY --from=stage --chown=node:node /home/node/build/RedsBot/package.json .
+
+COPY --from=builder --chown=node:node /home/node/build/RedsBot/dist .
+COPY --from=builder --chown=node:node /home/node/build/RedsBot/node_modules ./node_modules
 
 CMD ["node", "/bot/index.js"]

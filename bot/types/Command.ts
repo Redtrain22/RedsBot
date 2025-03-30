@@ -1,4 +1,4 @@
-import { AutocompleteInteraction, Client, CommandInteraction, SlashCommandBuilder } from "discord.js";
+import { AutocompleteInteraction, Client, CommandInteraction, SlashCommandOptionsOnlyBuilder, SlashCommandSubcommandsOnlyBuilder } from "discord.js";
 
 export interface Command {
 	run: (client: Client, interaction: CommandInteraction) => Promise<void>;
@@ -6,6 +6,6 @@ export interface Command {
 
 	config: {
 		enabled: boolean;
-		options: SlashCommandBuilder;
+		options: SlashCommandOptionsOnlyBuilder | SlashCommandSubcommandsOnlyBuilder;
 	};
 }

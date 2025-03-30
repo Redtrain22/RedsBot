@@ -5,8 +5,6 @@ import * as databaseManager from "./managers/Database.js";
 import * as commandManager from "./managers/Commands.js";
 import * as eventManager from "./managers/Events.js";
 
-// New instance of the discord client
-// const intents = new Intents(["GUILDS", "GUILD_MESSAGES", "GUILD_BANS", "GUILD_VOICE_STATES", "DIRECT_MESSAGES"]); // Client Intents
 const intents = [
 	GatewayIntentBits.Guilds,
 	GatewayIntentBits.GuildModeration,
@@ -16,6 +14,8 @@ const intents = [
 ];
 const partials = [Partials.Channel];
 const client = new Client({ intents, partials }); // Client has to be declared out here so it's accessible to the reboot function.
+
+client.on("debug", console.log).on("warn", console.log);
 
 process.on("uncaughtException", async (err) => {
 	// log the exception

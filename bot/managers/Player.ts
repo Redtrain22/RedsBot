@@ -62,7 +62,7 @@ export function play(interaction: CommandInteraction, connection: VoiceConnectio
 					queueManager.getQueue((interaction.guild as Guild).id)?.length == 0) &&
 				queueManager.getCurrentSong((interaction.guild as Guild).id) == undefined
 			) {
-				if (interaction.channel) {
+				if (interaction.channel && !interaction.channel.isDMBased()) {
 					await interaction.channel.send({ content: "Nothing in queue, leaving channel." });
 				}
 				connection.destroy();

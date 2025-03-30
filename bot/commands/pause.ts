@@ -32,6 +32,5 @@ const options = new SlashCommandBuilder()
 
 export const config = {
 	enabled: true,
-
 	options,
 } satisfies Command["config"];
