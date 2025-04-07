@@ -1,15 +1,14 @@
 {
 	"$schema": "https://json.schemastore.org/tsconfig",
 
-	"include": ["bot/**/*", "./index.ts"],
+	"include": ["./eslint.config.ts", "./index.ts", "bot/**/*.ts"],
 	"exclude": ["dist", "node_modules"],
 	"compilerOptions": {
-		"lib": ["ES2024"],
+		"lib": ["ESNext"],
 		"module": "NodeNext",
-		"target": "ES2024",
+		"target": "ESNext",
 		"moduleResolution": "NodeNext",
 		"strict": true,
-		"esModuleInterop": true,
 		"forceConsistentCasingInFileNames": true,
 		"strictNullChecks": true,
 		"strictFunctionTypes": true,
