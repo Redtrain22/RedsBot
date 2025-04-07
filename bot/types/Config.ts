@@ -5,7 +5,7 @@ export function isValidDialect(dialect: string | undefined): dialect is Dialect 
 	return Dialects.includes(dialect as Dialect);
 }
 
-export type Config = {
+export interface Config {
 	version: string;
 	ownerIds: string[];
 	devIds: string[];
@@ -19,4 +19,4 @@ export type Config = {
 	databaseUser: string;
 	databasePassword: string;
 	databaseLogging: boolean;
-};
+}

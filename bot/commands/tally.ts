@@ -6,6 +6,7 @@ import {
 	AutocompleteInteraction,
 	EmbedBuilder,
 	Collection,
+	InteractionContextType,
 } from "discord.js";
 import { Tally } from "../models/Tally.js";
 import { TallyRules } from "../models/TallyRules.js";
@@ -53,7 +54,7 @@ async function handleRuleCreate(interaction: ChatInputCommandInteraction) {
 	const ruleName = interaction.options.getString("name", true);
 	const [guildRules, firstRule] = await TallyRules.findOrCreate({
 		where: { guildId: interaction.guild.id },
-		defaults: { guildId: interaction.guild.id, rules: `${ruleName}` },
+		defaults: { guildId: interaction.guild.id, rules: ruleName },
 	});
 
 	if (!firstRule) await guildRules.addRule(ruleName);
@@ -68,7 +69,7 @@ async function handleRuleBulkCreate(interaction: ChatInputCommandInteraction) {
 	for (const rule of rules) {
 		const [guildRules, firstRule] = await TallyRules.findOrCreate({
 			where: { guildId: interaction.guild.id },
-			defaults: { guildId: interaction.guild.id, rules: `${rule}` },
+			defaults: { guildId: interaction.guild.id, rules: rule },
 		});
 
 		if (!firstRule) await guildRules.addRule(rule);
@@ -107,14 +108,14 @@ async function handleRuleList(interaction: ChatInputCommandInteraction) {
 async function handleTallyAdd(interaction: ChatInputCommandInteraction) {
 	if (!interaction.guild) return;
 	const ruleName = interaction.options.getString("name", true);
-	const ruleTally = interaction.options.getInteger("tally") || 1;
+	const ruleTally = interaction.options.getInteger("tally") ?? 1;
 	const [playerTally] = await Tally.findOrCreate({
-		where: { guildId: interaction.guild?.id, userId: interaction.user.id, ruleName: ruleName },
+		where: { guildId: interaction.guild.id, userId: interaction.user.id, ruleName: ruleName },
 		defaults: { guildId: interaction.guild.id, userId: interaction.user.id, tallyCount: 0, ruleName },
 	});
 
-	playerTally?.add(ruleTally);
-	await interaction.reply(`Added ${ruleTally} to ${ruleName}`);
+	await playerTally.add(ruleTally);
+	await interaction.reply(`Added ${ruleTally.toString()} to ${ruleName}`);
 }
 
 async function handleTallyTotal(interaction: ChatInputCommandInteraction) {
@@ -141,14 +142,14 @@ async function handleTallyTotal(interaction: ChatInputCommandInteraction) {
 		const playerTallies = ruleScores.get(rule) ?? [];
 		playerTallies.forEach((value) => {
 			totalRuleTally += value.total;
-			description += `<@${value.userId}>'s tally is: **${value.total}**\n\n`;
+			description += `<@${value.userId}>'s tally is: **${value.total.toString()}**\n\n`;
 		});
 
 		tallyTotal += totalRuleTally;
-		description += `The total tally of ${rule} is: ${totalRuleTally}\n\n`;
+		description += `The total tally of ${rule} is: ${totalRuleTally.toString()}\n\n`;
 	}
 
-	playerEmbed.setTitle(`${playerEmbed.data.title ?? ""}: ${tallyTotal}`);
+	playerEmbed.setTitle(`${playerEmbed.data.title ?? ""}: ${tallyTotal.toString()}`);
 	playerEmbed.setDescription(description);
 	await interaction.reply({ embeds: [playerEmbed] });
 }
@@ -209,7 +210,7 @@ const options = new SlashCommandBuilder()
 		// .addStringOption((option) => option.setName("ruleName").setDescription("The rule to list a tally to. Must be provided").setAutocomplete(true))
 		// .addIntegerOption((option) => option.setName("tally").setDescription("Number of tallies to add, defaults to 1."))
 	)
-	.setDMPermission(false)
+	.setContexts(InteractionContextType.Guild)
 	.setDefaultMemberPermissions(PermissionFlagsBits.UseApplicationCommands);
 
 export const config = {

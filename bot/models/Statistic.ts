@@ -7,7 +7,7 @@ export class Statistic extends Model<InferAttributes<Statistic>, InferCreationAt
 	declare createdAt: CreationOptional<Date>;
 	declare updatedAt: CreationOptional<Date>;
 
-	add(number = 1): NonAttribute<void> {
-		this.increment("interactionCount", { by: number });
+	async add(number = 1): Promise<NonAttribute<void>> {
+		await this.increment("interactionCount", { by: number });
 	}
 }

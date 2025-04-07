@@ -1,4 +1,12 @@
-import { EmbedBuilder, Client, ChatInputCommandInteraction, SlashCommandBuilder, PermissionFlagsBits, AutocompleteInteraction } from "discord.js";
+import {
+	EmbedBuilder,
+	Client,
+	ChatInputCommandInteraction,
+	SlashCommandBuilder,
+	PermissionFlagsBits,
+	AutocompleteInteraction,
+	InteractionContextType,
+} from "discord.js";
 import * as queueManager from "../managers/Queue.js";
 import { Command } from "../types/Command.js";
 
@@ -11,16 +19,17 @@ export async function run(client: Client, interaction: ChatInputCommandInteracti
 	const pageNum = interaction.options.getInteger("page");
 
 	const currentQueue = queueManager.getQueue(interaction.guild.id);
+	const currentSong = queueManager.getCurrentSong(interaction.guild.id);
 
 	const queue = new EmbedBuilder();
 
 	queue.setTitle("Current Queue").setTimestamp(Date.now());
 
-	if (queueManager.getCurrentSong(interaction.guild.id) == undefined) {
+	if (currentSong == undefined) {
 		await interaction.reply({ embeds: [queue.setDescription("Nothing currently playing in the bot.")] });
 		return;
 	} else {
-		queue.setDescription(`Current Song:\n ${queueManager.getCurrentSong(interaction.guild.id)?.metadata?.youtubeURL}`);
+		queue.setDescription(`Current Song:\n ${currentSong.metadata.youtubeURL}`);
 	}
 
 	if (currentQueue == undefined) {
@@ -32,10 +41,7 @@ export async function run(client: Client, interaction: ChatInputCommandInteracti
 		// Check if this page can actually be populated, atleast partially
 		if (currentQueue.length > 25 * (pageNum - 1)) {
 			for (let i = 25 * (pageNum - 1); i < 25 * pageNum; i++) {
-				// We don't want undefined in our queue so we skip it.
-				if (currentQueue[i] != undefined) {
-					queue.addFields({ name: `Song ${i + 1}`, value: `${currentQueue[i].metadata.youtubeURL}` });
-				}
+				queue.addFields({ name: `Song ${(i + 1).toString()}`, value: currentQueue[i].metadata.youtubeURL });
 			}
 		} else {
 			await interaction.reply("There's no results on the page, please pick a different page.");
@@ -43,9 +49,7 @@ export async function run(client: Client, interaction: ChatInputCommandInteracti
 		}
 	} else {
 		for (let i = 0; i < 25; i++) {
-			// We don't want undefined in our queue so we skip it.
-			if (currentQueue[i] == undefined) continue;
-			queue.addFields({ name: `Song ${i + 1}`, value: `${currentQueue[i].metadata.youtubeURL}` });
+			queue.addFields({ name: `Song ${(i + 1).toString()}`, value: currentQueue[i].metadata.youtubeURL });
 		}
 	}
 
@@ -59,7 +63,7 @@ const options = new SlashCommandBuilder()
 	.setName("queue")
 	.setDescription("Shows the music queue.")
 	.addIntegerOption((option) => option.setName("page").setDescription("A page number to browse.").setRequired(false))
-	.setDMPermission(false)
+	.setContexts(InteractionContextType.Guild)
 	.setDefaultMemberPermissions(PermissionFlagsBits.UseApplicationCommands);
 
 export const config = {

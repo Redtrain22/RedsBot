@@ -13,6 +13,7 @@ import {
 	ChatInputCommandInteraction,
 	Client,
 	GuildMember,
+	InteractionContextType,
 	PermissionFlagsBits,
 	SlashCommandBuilder,
 } from "discord.js";
@@ -77,9 +78,9 @@ async function searchSong(query: string): Promise<string | undefined> {
 	const results = await ytSearcher.search(query, { type: "video" });
 
 	if (results.currentPage?.first() == null) return undefined;
-	if (results.currentPage?.first()?.url == undefined) return undefined;
+	if (results.currentPage.first()?.url == undefined) return undefined;
 
-	return results.currentPage?.first()?.url;
+	return results.currentPage.first()?.url;
 }
 
 export async function run(client: Client, interaction: ChatInputCommandInteraction): Promise<void> {
@@ -128,7 +129,7 @@ export async function run(client: Client, interaction: ChatInputCommandInteracti
 
 	// Initialize our connection.
 	const connection =
-		getVoiceConnection(interaction.guild.id) ||
+		getVoiceConnection(interaction.guild.id) ??
 		joinVoiceChannel({
 			// The channel was checked up above
 			channelId: (interaction.member as GuildMember).voice.channelId as string,
@@ -152,7 +153,6 @@ export async function run(client: Client, interaction: ChatInputCommandInteracti
 	// N being however many times the command was ran.
 	if (!(connection.listenerCount(VoiceConnectionStatus.Disconnected) > 0)) {
 		// Handle the bot being disconnected from the voice channel
-		// eslint-disable-next-line @typescript-eslint/no-unused-vars
 		connection.on(VoiceConnectionStatus.Disconnected, async function disconnected(oldState, newState) {
 			try {
 				await Promise.race([
@@ -161,7 +161,7 @@ export async function run(client: Client, interaction: ChatInputCommandInteracti
 				]);
 
 				// Seems to be reconnecting to a new channel - ignore disconnect
-			} catch (error) {
+			} catch {
 				// Seems to be a real disconnect which SHOULDN'T be recovered from
 				if (connection.state.status != VoiceConnectionStatus.Destroyed) connection.destroy();
 			}
@@ -176,7 +176,7 @@ const options = new SlashCommandBuilder()
 	.setName("play")
 	.setDescription("Play a song in the bot.")
 	.addStringOption((option) => option.setName("query").setDescription("Youtube link, or something to search Youtube for.").setRequired(true))
-	.setDMPermission(false)
+	.setContexts(InteractionContextType.Guild)
 	.setDefaultMemberPermissions(PermissionFlagsBits.UseApplicationCommands);
 
 export const config = {

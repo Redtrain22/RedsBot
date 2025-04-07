@@ -20,7 +20,7 @@ export class TallyRules extends Model<InferAttributes<TallyRules>, InferCreation
 		rulesArr.splice(rulesArr.indexOf(rule), 1);
 		this.rules = rulesArr.join("\0");
 
-		if (rulesArr.indexOf("") != -1) rulesArr.splice(rulesArr.indexOf(""), 1);
+		if (rulesArr.includes("")) rulesArr.splice(rulesArr.indexOf(""), 1);
 
 		await this.save();
 	}

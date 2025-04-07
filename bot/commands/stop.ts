@@ -1,4 +1,11 @@
-import { Client, ChatInputCommandInteraction, PermissionFlagsBits, SlashCommandBuilder, AutocompleteInteraction } from "discord.js";
+import {
+	Client,
+	ChatInputCommandInteraction,
+	PermissionFlagsBits,
+	SlashCommandBuilder,
+	AutocompleteInteraction,
+	InteractionContextType,
+} from "discord.js";
 import * as playerManager from "../managers/Player.js";
 import * as queueManager from "../managers/Queue.js";
 import { Command } from "../types/Command.js";
@@ -21,7 +28,7 @@ export function autocomplete(client: Client, interaction: AutocompleteInteractio
 const options = new SlashCommandBuilder()
 	.setName("stop")
 	.setDescription("Stops the bot from playing music AND clears the queue.")
-	.setDMPermission(false)
+	.setContexts(InteractionContextType.Guild)
 	.setDefaultMemberPermissions(PermissionFlagsBits.UseApplicationCommands);
 
 export const config = {

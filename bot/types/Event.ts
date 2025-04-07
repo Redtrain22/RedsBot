@@ -1,9 +1,9 @@
 import { Client, ClientEvents } from "discord.js";
 
-type EventOptions = {
+interface EventOptions {
 	name: keyof ClientEvents;
 	once: boolean;
-};
+}
 
 export interface Event extends EventOptions {
 	name: keyof ClientEvents;

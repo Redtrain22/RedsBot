@@ -1,4 +1,11 @@
-import { Client, ChatInputCommandInteraction, PermissionFlagsBits, SlashCommandBuilder, AutocompleteInteraction } from "discord.js";
+import {
+	Client,
+	ChatInputCommandInteraction,
+	PermissionFlagsBits,
+	SlashCommandBuilder,
+	AutocompleteInteraction,
+	InteractionContextType,
+} from "discord.js";
 import * as playerManager from "../managers/Player.js";
 import { Command } from "../types/Command.js";
 
@@ -12,10 +19,10 @@ export async function run(client: Client, interaction: ChatInputCommandInteracti
 
 	if (volume) {
 		playerManager.setVolume(interaction.guild.id, volume);
-		await interaction.reply({ content: `Set volume to ${volume}` });
+		await interaction.reply({ content: `Set volume to ${volume.toString()}` });
 		return;
 	} else {
-		await interaction.reply({ content: `Current Volume: ${playerManager.getVolume(interaction.guild.id) || 0.5 * 100}` });
+		await interaction.reply({ content: `Current Volume: ${(playerManager.getVolume(interaction.guild.id) ?? 0.5 * 100).toString()}` });
 		return;
 	}
 }
@@ -28,7 +35,7 @@ const options = new SlashCommandBuilder()
 	.setName("volume")
 	.setDescription("Shows or edits the current volume.")
 	.addIntegerOption((option) => option.setName("volume").setDescription("The volume expressed as a percentage").setRequired(false))
-	.setDMPermission(false)
+	.setContexts(InteractionContextType.Guild)
 	.setDefaultMemberPermissions(PermissionFlagsBits.UseApplicationCommands);
 
 export const config = {

@@ -1,12 +1,19 @@
-import { ChatInputCommandInteraction, Client, SlashCommandBuilder, PermissionFlagsBits, AutocompleteInteraction } from "discord.js";
+import {
+	ChatInputCommandInteraction,
+	Client,
+	SlashCommandBuilder,
+	PermissionFlagsBits,
+	AutocompleteInteraction,
+	InteractionContextType,
+} from "discord.js";
 import { Command } from "../types/Command.js";
 
 export async function run(client: Client, interaction: ChatInputCommandInteraction): Promise<void> {
 	const sides = interaction.options.getInteger("sides", true);
-	let amount = interaction.options.getInteger("amount") || 1;
-	const advantage = interaction.options.getBoolean("advantage") || false;
-	const disadvantage = interaction.options.getBoolean("disadvantage") || false;
-	const additive = interaction.options.getInteger("additive") || 0;
+	let amount = interaction.options.getInteger("amount") ?? 1;
+	const advantage = interaction.options.getBoolean("advantage") ?? false;
+	const disadvantage = interaction.options.getBoolean("disadvantage") ?? false;
+	const additive = interaction.options.getInteger("additive") ?? 0;
 
 	const rolls = [];
 
@@ -24,36 +31,35 @@ export async function run(client: Client, interaction: ChatInputCommandInteracti
 	// Formatting is mainly done here.
 	if (advantage) {
 		if (rolls[0] >= rolls[1]) {
-			formattedRolls.push(`(ADV) **${rolls[0]}**, ~~${rolls[1]}~~`);
+			formattedRolls.push(`(ADV) **${rolls[0].toString()}**, ~~${rolls[1].toString()}~~`);
 			// Drop the roll from rolls so our total at the output is correct.
 			rolls.pop();
 		} else {
-			formattedRolls.push(`(ADV) ~~${rolls[0]}~~, **${rolls[1]}**`);
+			formattedRolls.push(`(ADV) ~~${rolls[0].toString()}~~, **${rolls[1].toString()}**`);
 			// Drop the roll from rolls so our total at the output is correct.
 			rolls.shift();
 		}
 	} else if (disadvantage) {
 		if (rolls[0] >= rolls[1]) {
-			formattedRolls.push(`(DIS) ~~${rolls[0]}~~, **${rolls[1]}**`);
+			formattedRolls.push(`(DIS) ~~${rolls[0].toString()}~~, **${rolls[1].toString()}**`);
 			// Drop the roll from rolls so our total at the output is correct.
 			rolls.shift();
 		} else {
-			formattedRolls.push(`(DIS) **${rolls[0]}**, ~~${rolls[1]}~~`);
+			formattedRolls.push(`(DIS) **${rolls[0].toString()}**, ~~${rolls[1].toString()}~~`);
 			// Drop the roll from rolls so our total at the output is correct.
 			rolls.pop();
 		}
 	} else {
 		for (const roll of rolls) {
-			formattedRolls.push(roll == 1 || roll == sides ? `**${roll}**` : `${roll}`);
+			formattedRolls.push(roll == 1 || roll == sides ? `**${roll.toString()}**` : roll.toString());
 		}
 	}
 
 	// Give our rolls to the user, the rest of the formatting is done here.
 	await interaction.reply({
-		content: `d${sides}x${amount}: [${formattedRolls.join(", ")}]${additive > 0 ? ` + ${additive}` : ""}\n\nTotal: ${rolls.reduce(
-			(total: number, rollResult: number) => total + rollResult,
-			additive
-		)}`,
+		content: `d${sides.toString()}x${amount.toString()}: [${formattedRolls.join(", ")}]${additive > 0 ? ` + ${additive.toString()}` : ""}\n\nTotal: ${rolls
+			.reduce((total: number, rollResult: number) => total + rollResult, additive)
+			.toString()}`,
 	});
 }
 
@@ -69,7 +75,7 @@ const options = new SlashCommandBuilder()
 	.addIntegerOption((option) => option.setName("additive").setDescription("A number to add to the roll").setRequired(false))
 	.addBooleanOption((option) => option.setName("advantage").setDescription("Whether the roll has advantage or not.").setRequired(false))
 	.addBooleanOption((option) => option.setName("disadvantage").setDescription("Whether the roll has disadvantage or not.").setRequired(false))
-	.setDMPermission(true)
+	.setContexts([InteractionContextType.Guild, InteractionContextType.BotDM, InteractionContextType.PrivateChannel])
 	.setDefaultMemberPermissions(PermissionFlagsBits.UseApplicationCommands);
 
 export const config = {

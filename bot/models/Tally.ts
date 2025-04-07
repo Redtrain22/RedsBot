@@ -9,7 +9,7 @@ export class Tally extends Model<InferAttributes<Tally>, InferCreationAttributes
 	declare createdAt: CreationOptional<Date>;
 	declare updatedAt: CreationOptional<Date>;
 
-	add(number = 1): NonAttribute<void> {
-		this.increment("tallyCount", { by: number });
+	async add(number = 1): Promise<NonAttribute<void>> {
+		await this.increment("tallyCount", { by: number });
 	}
 }

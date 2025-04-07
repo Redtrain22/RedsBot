@@ -15,8 +15,6 @@ const intents = [
 const partials = [Partials.Channel];
 const client = new Client({ intents, partials }); // Client has to be declared out here so it's accessible to the reboot function.
 
-client.on("debug", console.log).on("warn", console.log);
-
 process.on("uncaughtException", async (err) => {
 	// log the exception
 	logger.fatal(err, "Uncaught Exception!");
@@ -39,7 +37,7 @@ export async function init(): Promise<void> {
 	await commandManager.init();
 	await eventManager.init(client);
 
-	client.login(configManager.getConfig().discordToken);
+	await client.login(configManager.getConfig().discordToken);
 }
 
 /**
@@ -49,7 +47,7 @@ export async function destroy(): Promise<void> {
 	eventManager.destroy(client);
 	commandManager.destroy();
 	await databaseManager.destroy();
-	client.destroy();
+	await client.destroy();
 }
 
 /**
@@ -96,7 +94,7 @@ export async function registerSlashCommands(scope: string): Promise<void> {
 	await commandManager.registerSlashCommands(client, scope);
 }
 
-export async function unregisterSlashCommands(args: string): Promise<void> {
+export async function unregisterSlashCommands(args: string | undefined): Promise<void> {
 	// Check length because we might want to do global commands.
 	if (args == undefined) {
 		await commandManager.unregisterSlashCommands(client);

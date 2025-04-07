@@ -1,6 +1,13 @@
 import * as queueManager from "../managers/Queue.js";
 import * as playerManager from "../managers/Player.js";
-import { Client, ChatInputCommandInteraction, SlashCommandBuilder, PermissionFlagsBits, AutocompleteInteraction } from "discord.js";
+import {
+	Client,
+	ChatInputCommandInteraction,
+	SlashCommandBuilder,
+	PermissionFlagsBits,
+	AutocompleteInteraction,
+	InteractionContextType,
+} from "discord.js";
 import { Command } from "../types/Command.js";
 
 export async function run(client: Client, interaction: ChatInputCommandInteraction): Promise<void> {
@@ -13,7 +20,7 @@ export async function run(client: Client, interaction: ChatInputCommandInteracti
 	if (songNumber != null && songNumber > 0 && songNumber <= Number(queueManager.getQueue(interaction.guild.id)?.length)) {
 		const skippedSong = queueManager.getQueue(interaction.guild.id)?.splice(songNumber - 1, 1)[0];
 
-		await interaction.reply({ content: `Skipped song number ${songNumber}, which was ${skippedSong?.metadata.youtubeURL}` });
+		await interaction.reply({ content: `Skipped song number ${songNumber.toString()}, which was ${skippedSong?.metadata.youtubeURL}` });
 		return;
 	} else if (songNumber == null || songNumber == 0) {
 		const currentSong = queueManager.getCurrentSong(interaction.guild.id);
@@ -31,7 +38,9 @@ const options = new SlashCommandBuilder()
 	.setName("skip")
 	.setDescription("Skip the current song, or a song in the queue.")
 	.addIntegerOption((option) => option.setName("song").setDescription("Skip a song in queue.").setRequired(false))
-	.setDMPermission(false)
+
+	.setContexts(InteractionContextType.Guild)
+
 	.setDefaultMemberPermissions(PermissionFlagsBits.UseApplicationCommands);
 
 export const config = {

@@ -20,12 +20,7 @@ export function destroy(guildId: string): void {
  * @param song - A string that's a YouTube URL.
  */
 export function addSong(guildId: string, song: AudioResource<PlayerMetadata>): void {
-	if (queue.get(guildId) == undefined) {
-		queue.set(guildId, []);
-	}
-
-	// The array should already be defined from above.
-	queue.set(guildId, queue.get(guildId)?.concat(song) as AudioResource<PlayerMetadata>[]);
+	queue.set(guildId, (queue.get(guildId) ?? []).concat(song));
 }
 
 /**

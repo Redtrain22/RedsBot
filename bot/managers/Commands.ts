@@ -1,6 +1,13 @@
 import { Command } from "../types/Command.js";
 
-import { ApplicationCommandPermissions, ApplicationCommandPermissionType, Client, Collection, PermissionFlagsBits } from "discord.js";
+import {
+	ApplicationCommandPermissions,
+	ApplicationCommandPermissionType,
+	Client,
+	Collection,
+	InteractionContextType,
+	PermissionFlagsBits,
+} from "discord.js";
 import fs from "node:fs";
 import logger from "./Logger.js";
 import { getConfig } from "./Config.js";
@@ -98,7 +105,7 @@ function generateSlashCommands() {
 	for (const [, command] of commands) {
 		if (!command.config.enabled) continue;
 		// We're only going to register commands that don't require a guild globally.
-		if (command.config.options.dm_permission) continue; // We're only generating global commands here.
+		if (!command.config.options.contexts?.includes(InteractionContextType.Guild)) continue; // We're only generating global commands here.
 		// if (command.help.defaultPermission == PermissionFlagsBits.UseApplicationCommands) {
 		globalCommands.push(command.config.options.toJSON());
 		// }
@@ -108,7 +115,7 @@ function generateSlashCommands() {
 	for (const [, command] of commands) {
 		if (!command.config.enabled) continue;
 		// We're only going to register commands that don't require a guild globally.
-		if (command.config.options.dm_permission) continue; // Only generate guild commands here.
+		if (command.config.options.contexts?.includes(InteractionContextType.Guild)) continue; // Only generate guild commands here.
 		// if (command.help.level == "User") {
 		guildCommands.push(command.config.options.toJSON());
 		// }
@@ -123,7 +130,7 @@ function generateSlashCommands() {
  * @param scope - A guildId to remove the commands from.
  */
 export async function unregisterSlashCommands(client: Client, scope = "global"): Promise<void> {
-	if (client.application?.commands) await client.application?.fetch();
+	if (client.application?.commands) await client.application.fetch();
 
 	if (scope == "global") {
 		await client.application?.commands.set([]);
@@ -131,7 +138,7 @@ export async function unregisterSlashCommands(client: Client, scope = "global"):
 	} else {
 		const guild = client.guilds.cache.get(scope);
 		await guild?.commands.set([]);
-		logger.info(`Unregistered slash commands in "${guild?.name}" (${guild?.id})`);
+		logger.info(`Unregistered slash commands in "${guild?.name ?? ""}" (${guild?.id ?? ""})`);
 	}
 }
 
@@ -151,7 +158,7 @@ async function setPermissions(client: Client, scope = "global", overrides = gene
 				// If the command doesn't exist as an ID we're going to ignore it.
 				const commandId = globalCommandIds.get(commandName);
 				if (commandId == undefined) continue;
-				await guild?.commands.permissions.add({
+				await guild.commands.permissions.add({
 					command: commandId,
 					permissions: permissions,
 					token: config.discordToken,

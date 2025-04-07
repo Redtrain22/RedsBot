@@ -3,6 +3,7 @@ import {
 	ChatInputCommandInteraction,
 	Client,
 	Collection,
+	InteractionContextType,
 	Message,
 	PermissionFlagsBits,
 	SlashCommandBuilder,
@@ -24,10 +25,10 @@ export async function run(client: Client, interaction: ChatInputCommandInteracti
 	const ageLimit = date.setDate(date.getDate() - 14).valueOf();
 
 	let actualMessages = 0;
-	const manualMessages = new Collection<string, Message<boolean>>();
+	const manualMessages = new Collection<string, Message>();
 
 	messages.forEach((message, key) => {
-		if (message.interaction?.id == interaction.id) messages.delete(key); // We don't want to delete the message that started it, would throw an Error.
+		if (message.interactionMetadata?.id == interaction.id) messages.delete(key); // We don't want to delete the message that started it, would throw an Error.
 		if (message.createdTimestamp <= ageLimit) {
 			messages.delete(key);
 			manualMessages.set(key, message);
@@ -45,7 +46,7 @@ export async function run(client: Client, interaction: ChatInputCommandInteracti
 		}
 	}
 
-	await interaction.followUp({ content: `Cleaned up ${actualMessages - 1} messages.` });
+	await interaction.followUp({ content: `Cleaned up ${(actualMessages - 1).toString()} messages.` });
 	return;
 }
 
@@ -57,7 +58,7 @@ const options = new SlashCommandBuilder()
 	.setName("purge")
 	.setDescription("Purge X number of messages from the channel")
 	.addIntegerOption((option) => option.setName("amount").setDescription("Number of messages to purge").setRequired(true))
-	.setDMPermission(false)
+	.setContexts(InteractionContextType.Guild)
 	.setDefaultMemberPermissions(PermissionFlagsBits.KickMembers | PermissionFlagsBits.BanMembers);
 
 export const config = {

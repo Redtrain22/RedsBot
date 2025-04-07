@@ -24,7 +24,11 @@ function createDB(): Sequelize {
 			// Where the sqlite3 database will sit.
 			storage: "./data/data.sqlite",
 
-			logging: config.databaseLogging ? (query: unknown) => logger.database(query) : false,
+			logging: config.databaseLogging
+				? (query) => {
+						logger.database(query);
+					}
+				: false,
 
 			pool: {
 				// Max number of clients
@@ -34,7 +38,7 @@ function createDB(): Sequelize {
 				min: 0,
 
 				// Idle time for a client
-				idle: 20000,
+				idle: 20_000,
 			},
 		});
 	}
@@ -52,7 +56,11 @@ function createDB(): Sequelize {
 
 		password: config.databasePassword,
 
-		logging: config.databaseLogging ? (query) => logger.database(query) : false,
+		logging: config.databaseLogging
+			? (query) => {
+					logger.database(query);
+				}
+			: false,
 
 		pool: {
 			// Max number of clients
@@ -62,7 +70,7 @@ function createDB(): Sequelize {
 			min: 0,
 
 			// Idle time for a client
-			idle: 20000,
+			idle: 20_000,
 		},
 	});
 }

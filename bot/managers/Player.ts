@@ -8,7 +8,7 @@ const audioPlayers = new Collection<string, AudioPlayer>();
  * Initialize an audioPlayer for the guild.
  * @param guildId - The guild's ID from discord.
  */
-export function init(guildId: string): void {
+export function init(guildId: string): AudioPlayer {
 	const audioPlayer = createAudioPlayer({
 		behaviors: {
 			noSubscriber: NoSubscriberBehavior.Pause,
@@ -16,6 +16,8 @@ export function init(guildId: string): void {
 	});
 
 	audioPlayers.set(guildId, audioPlayer);
+
+	return audioPlayer;
 }
 
 /**
@@ -40,14 +42,10 @@ export function play(interaction: CommandInteraction, connection: VoiceConnectio
 	// Check the guild just in case.
 	if (interaction.guild == null) return;
 
+	// Get the audioPlayer from the Collection.
 	// If we don't have an audio player, we make one.
 	// AudioPlayers are meant to be reused.
-	if (audioPlayers.get(interaction.guild.id) == undefined) {
-		init(interaction.guild.id);
-	}
-
-	// Get the audioPlayer from the Collection.
-	const audioPlayer = audioPlayers.get(interaction.guild.id) as AudioPlayer;
+	const audioPlayer = audioPlayers.get(interaction.guild.id) ?? init(interaction.guild.id);
 	// We shift the queue here so that we know what the current song is.
 	queueManager.shiftQueue(interaction.guild.id);
 
@@ -69,12 +67,12 @@ export function play(interaction: CommandInteraction, connection: VoiceConnectio
 			}
 		}, 30_000);
 	} else {
-		audioPlayer?.play(queueManager.getCurrentSong(interaction.guild.id) as AudioResource); // We've check that the current song isn't undefined above.
+		audioPlayer.play(queueManager.getCurrentSong(interaction.guild.id) as AudioResource); // We've check that the current song isn't undefined above.
 		connection.subscribe(audioPlayer);
 
 		// We only want to attach one listener to the audioPlayer.
-		if (!(audioPlayer?.listenerCount(AudioPlayerStatus.Idle) > 0)) {
-			audioPlayer?.once(AudioPlayerStatus.Idle, function playNextSong() {
+		if (!(audioPlayer.listenerCount(AudioPlayerStatus.Idle) > 0)) {
+			audioPlayer.once(AudioPlayerStatus.Idle, function playNextSong() {
 				play(interaction, connection);
 			});
 		}
