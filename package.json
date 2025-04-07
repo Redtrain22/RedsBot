@@ -8,11 +8,10 @@
 		"node": ">=18.5.0"
 	},
 	"scripts": {
-		"start": "node dist/index.js",
-		"start:dev": "npx tsx index.ts | npx pino-pretty",
-		"build": "tsc --build",
+		"start": "pnpm exec tsx index.ts",
+		"start:dev": "pnpm exec tsx index.ts | pnpm exec pino-pretty",
 		"build:docker": "docker buildx build -t git.redtrain.me/redtrain22/redsbot:latest --platform \"linux/amd64,linux/arm64\" .",
-		"build:docker-beta": "docker buildx build -t git.redtrain.me/redtrain22/redsbot:test --platform \"linux/amd64,linux/arm64\" .",
+		"build:docker-beta": "docker buildx build -t git.redtrain.me/redtrain22/redsbot:beta --platform \"linux/amd64,linux/arm64\" .",
 		"test": "echo \"Error: no test specified\" && exit 1"
 	},
 	"repository": {
