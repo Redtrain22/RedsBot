@@ -4,9 +4,9 @@
 	"include": ["./eslint.config.ts", "./index.ts", "bot/**/*.ts"],
 	"exclude": ["dist", "node_modules"],
 	"compilerOptions": {
-		"lib": ["ESNext"],
+		"lib": ["ES2024"],
 		"module": "NodeNext",
-		"target": "ESNext",
+		"target": "ES2024",
 		"moduleResolution": "NodeNext",
 		"strict": true,
 		"forceConsistentCasingInFileNames": true,
