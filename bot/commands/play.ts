@@ -1,5 +1,5 @@
 import * as fs from "node:fs";
-import youtube from "youtube-dl-exec";
+import ytDownloader from "youtube-dl-exec";
 import * as queueManager from "../managers/Queue.js";
 import * as playerManager from "../managers/Player.js";
 import logger from "../managers/Logger.js";
@@ -12,7 +12,6 @@ import {
 	ChannelType,
 	ChatInputCommandInteraction,
 	Client,
-	GuildMember,
 	InteractionContextType,
 	PermissionFlagsBits,
 	SlashCommandBuilder,
@@ -44,10 +43,10 @@ async function getFile(youtubeSong: string): Promise<string> {
 	const SUBSTRING_END = SUBSTRING_START + 11;
 	const cacheFile = getCacheFile(youtubeSong.substring(SUBSTRING_START, SUBSTRING_END));
 
-	if (cacheFile == undefined) await youtube.exec(youtubeSong, DOWNLOAD_OPTIONS);
+	if (cacheFile == undefined) await ytDownloader.exec(youtubeSong, DOWNLOAD_OPTIONS);
 
 	// TODO Find a way to not call the getCacheFile function twice
-	const videoFile = getCacheFile(youtubeSong.substring(SUBSTRING_START, SUBSTRING_END)) as string;
+	const videoFile = getCacheFile(youtubeSong.substring(SUBSTRING_START, SUBSTRING_END));
 	const oggFile = videoFile.substring(0, videoFile.lastIndexOf(".")).concat(".ogg");
 
 	return oggFile;
@@ -74,7 +73,6 @@ function getCacheFile(videoId: string): string | undefined {
  * @returns A youtube URL or null
  */
 async function searchSong(query: string): Promise<string | undefined> {
-	if (query == null) return undefined;
 	const results = await ytSearcher.search(query, { type: "video" });
 
 	if (results.currentPage?.first() == null) return undefined;
@@ -91,9 +89,12 @@ export async function run(client: Client, interaction: ChatInputCommandInteracti
 		return;
 	}
 
+	const memberVoiceChannel =
+		interaction.member && "voice" in interaction.member && interaction.member.voice.channel ? interaction.member.voice.channel : undefined;
+
 	// If the user isn't in voice, tell them to join.
-	if (!((interaction.member as GuildMember).voice.channel?.type == ChannelType.GuildVoice)) {
-		await interaction.followUp({ content: "Please join a voice channel to use this command", ephemeral: true });
+	if (!(memberVoiceChannel && memberVoiceChannel.type == ChannelType.GuildVoice)) {
+		await interaction.followUp({ content: "Please join a voice channel to use this command", flags: "Ephemeral" });
 		return;
 	}
 
@@ -131,8 +132,7 @@ export async function run(client: Client, interaction: ChatInputCommandInteracti
 	const connection =
 		getVoiceConnection(interaction.guild.id) ??
 		joinVoiceChannel({
-			// The channel was checked up above
-			channelId: (interaction.member as GuildMember).voice.channelId as string,
+			channelId: memberVoiceChannel.id,
 			guildId: interaction.guild.id,
 			adapterCreator: interaction.guild.voiceAdapterCreator,
 		});
